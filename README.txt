@@ -10,3 +10,6 @@ fwf_extract.py:
 
 las1_3_handler.py:
    A library to read and extract data from a LAS1.3 file.
+
+read_sol_file.py:
+   A script / library to read SOL navigation files and write records to an ASCII text file.
