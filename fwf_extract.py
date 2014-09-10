@@ -1,4 +1,5 @@
 #! /usr/bin/env python
+# -*- coding: utf-8 -*-
 
 ###########################################################
 # This file has been created by ARSF Data Analysis Node and 
@@ -6,7 +7,7 @@
 # licence is available to download with this file.
 ###########################################################
 
-# -*- coding: utf-8 -*-
+
 #To run:
 # python fwf_extract.py LAS1.3_filename
 #
@@ -89,14 +90,24 @@ def main(argv):
   min_east = user_limits[3]
 
 # check specified area is valid
-  if max_north > Max_y or max_north < min_north or min_north < Min_y :    
+  if max_north > Max_y or min_north < Min_y :    
     print "Error with northing values entered (max %f min %f)\n" %(max_north, min_north) 
     print "Northing values must be between %f and %f " %(Min_y,Max_y)
     print "Please check user inputs and try again \n"
     sys.exit(1)
-  elif max_east > Max_x or  min_east > max_east or min_east < Min_x:
+  elif max_north < min_north:
+    print "Error with northing values entered (max %f min %f)\n" %(max_north, min_north) 
+    print "Min Northing %f must be less than Max Northing %f" %(min_north,max_north)  
+    print "Please check user inputs and try again \n"
+    sys.exit(1)
+  elif max_east > Max_x or min_east < Min_x:
     print "Error with easting values entered (max %f min %f)\n" %(max_east, min_east) 
     print "Easting values must be between %f and %f " %(Min_x,Max_x)  
+    print "Please check user inputs and try again \n"
+    sys.exit(1)
+  elif max_east < min_east:
+    print "Error with easting values entered (max %f min %f)\n" %(max_east, min_east) 
+    print "Min East %f must be less than Max East %f" %(min_east,max_east)  
     print "Please check user inputs and try again \n"
     sys.exit(1)
    #end if

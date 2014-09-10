@@ -1,4 +1,5 @@
 #! /usr/bin/env python
+# -*- coding: utf-8 -*-
 
 ###########################################################
 # This file has been created by ARSF Data Analysis Node and 
@@ -6,7 +7,6 @@
 # licence is available to download with this file.
 ###########################################################
 
-# -*- coding: utf-8 -*-
 ###
 # Python library for reading Las1.3 header files and extracting ASCII full 
 # waveform information for a specified area
@@ -630,46 +630,50 @@ def readLASWaves(headdata,filename,output_dir,user_limits):
       wave_desc = point_info[11]
     
       if wave_desc <> 0: # if there is waveform asociated to this point 
-	wavedata = []
-	wavedata.append(point_info)
-	wave_offset = Offset_EVLRH + point_info[12]
-	wave_size = point_info[13]
-	
-	tmp= lasfile.tell() #saves current position in input file before jumpin to wave info
-	lasfile.seek(wave_offset)
-	wave_dat = lasfile.read(wave_size)
-	wave_data = struct.unpack("=%db" %wave_size, wave_dat)
-        wavedata.append(wave_data)
-	
-	writeWaveform(wavedata,wv_info,output_dir)
+        wavedata = []
+        wavedata.append(point_info)
+        wave_offset = Offset_EVLRH + point_info[12]
+        wave_size = point_info[13]
 
-	
-	lasfile.seek(tmp) # Goes back to next point in file
-	
-	count+=1
+        tmp= lasfile.tell() #saves current position in input file before jumpin to wave info
+        lasfile.seek(wave_offset)
+        wave_dat = lasfile.read(wave_size)
+        wave_data = struct.unpack("=%db" %wave_size, wave_dat)
+        wavedata.append(wave_data)
+
+        writeWaveform(wavedata,wv_info,output_dir)
+
+
+        lasfile.seek(tmp) # Goes back to next point in file
+
+        count+=1
       #end if
     #end if
   #end for
- 	
+
   if count==0:
     print "\nNo wave forms have been found for the specified area"
     print "Please check your data and try again\n"
-  else: 	
+  else: 
     print "Number of extracted waves:", count
   
   #end if
 
   # After points, read EVLR
-  try:
-    evlr_record = lasfile.read(EVLR_length)
-  except:
-    tb = sys.exc_info()[2] # Get traceback (causes circular reference to clean up later)
-    raise IOError, "Reading failed on input LAS file while reading Vble length record " + filename, tb
-  #end try 
+  #It doesn't contain anything useful really... so commented out
+#  try:
+#    evlr_record = lasfile.read(EVLR_length)
+#  except:
+#    tb = sys.exc_info()[2] # Get traceback (causes circular reference to clean up later)
+#    raise IOError, "Reading failed on input LAS file while reading Vble length record " + filename, tb
+#  #end try 
 
-  evlr_data = struct.unpack("=H16sHQ32s", evlr_record)
-  #It doesn't contain anything useful really...
-  #print "Extended Variable Length Record Header:", evlr_data
+#  if len(evlr_record) != struct.calcsize("=H16sHQ32s"):
+#    raise Exception("Extended VLR length is not equal to expected size")
+#  
+#  evlr_data = struct.unpack("=H16sHQ32s", evlr_record)
+#  #It doesn't contain anything useful really...
+#  #print "Extended Variable Length Record Header:", evlr_data
 
   lasfile.close()
 
