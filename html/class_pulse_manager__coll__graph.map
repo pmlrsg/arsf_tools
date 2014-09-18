@@ -1,0 +1,4 @@
+<map id="PulseManager" name="PulseManager">
+<area shape="rect" id="node2" href="$struct_types_1_1_public___header___block.html" title="{Types::Public_Header\l_Block\n|+ file_signiture\l+ file_source_ID\l+ global_encoding\l+ project_ID_GUID_data_1\l+ project_ID_GUID_data_2\l+ project_ID_GUID_data_3\l+ project_ID_GUID_data_4\l+ version_major\l+ version_minor\l+ system_identifier\land 23 more...\l|}" alt="" coords="5,6,181,245"/>
+<area shape="rect" id="node3" href="$struct_types_1_1_w_f__packet___descriptor.html" title="{Types::WF_packet_Descriptor\n|+ bits_per_sample\l+ wf_compression_type\l+ number_of_samples\l+ temporal_sample_spacing\l+ digitizer_gain\l+ digitizer_offset\l|}" alt="" coords="206,50,399,201"/>
+</map>

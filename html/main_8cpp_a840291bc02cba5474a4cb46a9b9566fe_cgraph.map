@@ -1,0 +1,9 @@
+<map id="main" name="main">
+<area shape="rect" id="node2" href="$class_pulse_manager.html#abaa88e799449721bd240e1fe4d412d15" title="method that returns the number of pulses;" alt="" coords="105,5,311,32"/>
+<area shape="rect" id="node3" href="$class_pulse_manager.html#ab1336c958c615e8ab22d00e4ddb7ce8c" title="method that prints all the information about a given pulse" alt="" coords="113,56,303,83"/>
+<area shape="rect" id="node4" href="$class_las1__3__handler.html#a26c4eb589bb77eed4ffb3d52831ea242" title="method that reads the data and returns a pulse manager with all the waveform information of the pulse..." alt="" coords="126,107,290,149"/>
+<area shape="rect" id="node5" href="$class_las1__3__handler.html#a8dd556ea509c155f17ec18917426afd9" title="method that reads public header block" alt="" coords="378,13,521,54"/>
+<area shape="rect" id="node6" href="$class_las1__3__handler.html#a61984668b12f4122923adde7cdeb885b" title="method that reads variable length records including waveform packet descriptors (up to 255)..." alt="" coords="367,78,531,119"/>
+<area shape="rect" id="node7" href="$class_pulse_manager.html#a62885f8a12c9a4af5680f0ad150e7e88" title="method that adds a fw pulse to the manager" alt="" coords="369,144,530,171"/>
+<area shape="rect" id="node8" href="$class_pulse_manager.html#a3f64d9a5116d4dd7dff498cb265a6672" title="method that sorts the discrete points into the pulses" alt="" coords="360,195,539,237"/>
+</map>
