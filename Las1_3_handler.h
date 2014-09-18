@@ -8,6 +8,11 @@
 #include "Types.h"
 #include "PulseManager.h"
 
+/// @authors Milto Miltiadou, supported by the Centre for DIgital Entertainment at the University of Bath, and Plymouth Marine Laboratory
+//The code is released under the GNU General Public License v3.0.
+//It reads a LAS1.3 file under the LAS specification version 1.3-R11 released October 24, 2010 (Available at: http://www.asprs.org/a/society/committees/standards/LAS_1_3_r11.pdf), using only the Point Data Record Format 4.
+//The original script was written in Python and it's available here: https://github.com/pmlrsg/arsf_tools and a lot of the comments were copied that Python script and the LAS1.3 file specifications
+
 class Las1_3_handler
 {
 public:
