@@ -1,9 +1,9 @@
 #ifndef PULSE_H
 #define PULSE_H
-#include <gmtl/Vec.h>
+#include "vec3d.h"
 #include "Types.h"
-#include <vector>
 
+#include <vector>
 #include <iostream>
 #include <fstream>
 
@@ -47,8 +47,9 @@ public:
    /// @param[in] i_point the position of the point
    /// @param[in] i_intensity the intensity of the point
    //--------------------------------------------------------------------------
-   void addDiscretePoint(gmtl::Vec3f i_point,
-           unsigned short i_intensity
+   void addDiscretePoint(Vec3d i_point,
+           unsigned short i_intensity,
+            double i_pointInWaveform
            );
    //--------------------------------------------------------------------------
    /// @brief method that prints all the attributes associated with this pulse
@@ -57,11 +58,11 @@ public:
    //--------------------------------------------------------------------------
    /// @brief method that returns the origin of the point
    //--------------------------------------------------------------------------
-   const gmtl::Vec3f &getOrigin(){return m_origin;}
+   const Vec3d &getOrigin(){return m_origin;}
    //--------------------------------------------------------------------------
    /// @brief method that returns the offset of the point
    //--------------------------------------------------------------------------
-   const gmtl::Vec3f &getOffset(){return m_offset;}
+   const Vec3d &getOffset(){return m_offset;}
    //--------------------------------------------------------------------------
    /// @brief method that returns the wave offset of the waveform packet
    /// used to identify waveforms and match 2nd,3rd and 4rd returns of the beam
@@ -77,7 +78,26 @@ public:
    //--------------------------------------------------------------------------
    ~Pulse();
 
-   static int count;
+
+   //Fudge factors for python code: swig - there is a better way but I can't get it to work
+
+   //Functions for returning waveform
+   bool sampleinwf(unsigned int s){if(s<m_noOfSamples){return true;}else{return false;}}
+   int sampleintensity(unsigned int sample){if(sampleinwf(sample)){return m_returns[sample];}else{return 0;}}
+   std::vector<double> sampleXYZ(unsigned int sample){if(sampleinwf(sample)){return (m_origin+(m_offset*sample)).AsStdVector();}else{return std::vector<double>(3,0);}}
+
+   //Functions for returning other data
+   double time(){return m_time;}
+   int nreturns(){return (int)m_numberOfReturnsForThisPulse;}
+   int nsamples(){return m_noOfSamples;}
+   int classification(){return (int)m_classification;}
+   int scanangle(){return (int)m_scanAngle;}
+   std::vector<double> pointinwaveform(){return m_discretePointInWaveform;}
+   std::vector<double> returnpointlocation(){return m_discreteReturnPointLocation;}
+   std::vector<int> discreteintensities(){return m_discreteIntensities;}
+   std::vector<double> originXYZ(){return m_origin.AsStdVector();}
+   std::vector<double> offsetXYZ(){return m_offset.AsStdVector();}
+   const double sampletime()const{return m_temporalSampleSpacing;}
 
 private:
 
@@ -86,13 +106,13 @@ private:
    //--------------------------------------------------------------------------
    char *m_returns;
 
-   gmtl::Vec3f m_point;
+   Vec3d m_point;
 
    char m_returnNumber;
 
    char m_numberOfReturnsForThisPulse;
 
-   float m_time;
+   double m_time;
 
    char m_scanAngle;
    // ---------------------------------------------------------------
@@ -112,33 +132,37 @@ private:
    // ---------------------------------------------------------------
    char m_classification;
 
-   float m_temporalSampleSpacing;
+   double m_temporalSampleSpacing;
 
    unsigned char m_AGCgain;
 
-   float m_digitiserGain;
+   double m_digitiserGain;
 
-   float m_digitiserOffset;
+   double m_digitiserOffset;
 
    unsigned int m_noOfSamples;
 
-   float m_sampleLength;
+   double m_sampleLength;
 
-   float m_returnPointLocation;
+   double m_returnPointLocation;
 
-   float m_pointInWaveform;
+   double m_pointInWaveform;
 
-   gmtl::Vec3f m_offset;
+   Vec3d m_offset;
 
-   gmtl::Vec3f m_origin;
+   Vec3d m_origin;
    //-------------------------------------------------------------------------
    /// @brief meters per nanosecond
    //-------------------------------------------------------------------------
-   static constexpr float c_light_speed = 0.299792458;
+   #ifdef SWIG
+   static const double c_light_speed = 0.299792458;
+   #else
+   static constexpr double c_light_speed = 0.299792458;
+   #endif
    //-------------------------------------------------------------------------
    /// @brief all the discrete points of the pulse
    //-------------------------------------------------------------------------
-   std::vector<gmtl::Vec3f> m_discretePoints;
+   std::vector<Vec3d> m_discretePoints;
    //-------------------------------------------------------------------------
    /// @brief the corresponding intensities of the discrete points
    //-------------------------------------------------------------------------
@@ -148,6 +172,10 @@ private:
    /// used to identify discrete points associated with the same waveform
    //-------------------------------------------------------------------------
    int m_waveOffset;
+
+
+   std::vector<double> m_discretePointInWaveform;
+   std::vector<double> m_discreteReturnPointLocation;
 
 
 };

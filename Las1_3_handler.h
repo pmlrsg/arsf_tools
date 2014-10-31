@@ -20,14 +20,8 @@ public:
    /// @brief default constructor
    /// @param[in] i_filename the file of the name to be read
    //-------------------------------------------------------------------------
-   Las1_3_handler(const std::string i_filename);
-   //-------------------------------------------------------------------------
-   /// @brief method that reads the data and returns a pulse manager with all
-   /// the waveform information of the pulses
-   /// NOTE: i_pulseManager is dynamic allocated, so by calling this function,
-   /// you are responsible for releasing memory afterwards.
-   //-------------------------------------------------------------------------
-   PulseManager * readFileAndGetPulseManager();
+   Las1_3_handler(std::string i_filename);
+
    //-------------------------------------------------------------------------
    /// @brief method that prints headdata
    //-------------------------------------------------------------------------
@@ -37,6 +31,32 @@ public:
    //-------------------------------------------------------------------------
    ~Las1_3_handler();
 
+   //-------------------------------------------------------------------------
+   //Function to only return points of certain classification
+   //-------------------------------------------------------------------------
+   PulseManager* GetPointsWithClassification(int classvalue);
+
+   //-------------------------------------------------------------------------
+   //Function to only return points contained in certain bounds
+   //-------------------------------------------------------------------------
+   PulseManager* GetPointsInBounds(float boundsn,float boundss,float boundsw,float boundse);
+
+   //-------------------------------------------------------------------------   
+   //Delete (free memory) from PulseManagers
+   //-------------------------------------------------------------------------
+   void DeletePulseManagers()
+   {
+      for(std::vector<PulseManager*>::iterator it=pulsemanagervector.begin();it!=pulsemanagervector.end();it++) 
+      {
+         if(*it != NULL)
+            delete *it;
+      } 
+      pulsemanagervector.clear();
+   }
+
+   //-------------------------------------------------------------------------
+   //-------------------------------------------------------------------------
+   PulseManager* ReadLikeBook(unsigned int chunksize=1,bool resettostart=false);
 
 protected:
    //-------------------------------------------------------------------------
@@ -92,7 +112,43 @@ private:
    //-------------------------------------------------------------------------
    static const unsigned int point_data_length = 57;
 
+   //-------------------------------------------------------------------------
+   // @brief Common code for handling points in GetPointsWith functions
+   //-------------------------------------------------------------------------
+   void HandlePoint(Types::Data_Point_Record_Format_4& point_info,unsigned int& count,
+                  PulseManager* i_pulseManager,std::vector<Vec3d>& discretePoints,std::vector<unsigned short>&  discreteIntensities,
+                  std::vector<int>& discreteWaveOffsets,std::vector<double>& discretePointInWaveform,
+                  unsigned int& countDiscrete,unsigned int& countIgnored);
 
+   //-------------------------------------------------------------------------
+   // @brief Vector to store pointers to all pulsemanagers created so that can be cleaned up afterwards
+   //-------------------------------------------------------------------------
+   std::vector<PulseManager*> pulsemanagervector;
+
+   //-------------------------------------------------------------------------
+   /// @brief a pulsemanager pointer to use for the ReadLikeBook function
+   //-------------------------------------------------------------------------
+   PulseManager* pmanager_book;
+
+   //-------------------------------------------------------------------------
+   /// @brief the length of the LAS file in bytes
+   //-------------------------------------------------------------------------
+   uint64_t filesize;
+
+   //-----------------------------------------------------------------------------
+   // @brief Common code to create a new pulse manager
+   //-----------------------------------------------------------------------------  
+   PulseManager* NewPulseManager();
+
+   //-----------------------------------------------------------------------------
+   // @brief Common code to read a point into a point record struct
+   //-----------------------------------------------------------------------------
+   bool ReadPoint(Types::Data_Point_Record_Format_4* point_info);
+
+   //-----------------------------------------------------------------------------
+   // @brief tell the library to be quiet - do not print status messages
+   //-----------------------------------------------------------------------------   
+   bool quiet;
 };
 
 #endif // LAS1_3_HANDLER_H

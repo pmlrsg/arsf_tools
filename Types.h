@@ -1,6 +1,6 @@
 #ifndef TYPES_H
 #define TYPES_H
-
+#include <stdint.h>
 /// @authors Milto Miltiadou, supported by the Centre for DIgital Entertainment at the University of Bath, and Plymouth Marine Laboratory
 
 //The code is released under the GNU General Public License v3.0.
@@ -116,9 +116,9 @@ public:
 #pragma pack(1)
    typedef struct Data_Point_Record_Format_4             // 57 bytes
    {
-      int X;                                             //  4 bytes   0
-      int Y;                                             //  4 bytes   1
-      int Z;                                             //  4 bytes   2
+      int32_t X;                                             //  4 bytes   0
+      int32_t Y;                                             //  4 bytes   1
+      int32_t Z;                                             //  4 bytes   2
       unsigned short itensity;                           //  2 bytes   3
       unsigned char returnNo_noOfRe_scanDirFla_EdgeFLn;  //  1 bytes   4
       // ---------------------------------------------------------------
@@ -165,8 +165,8 @@ public:
       // relative to the beginning of the file is given by:
       // Start of WF data Packet Record + Byte offset to WF packet data
       // ---------------------------------------------------------------
-      unsigned long long byte_offset_to_wf_packet_data;  //  8 bytes  12
-      unsigned int wf_packet_size_in_bytes;              //  4 bytes  13
+      uint64_t byte_offset_to_wf_packet_data;  //  8 bytes  12
+      uint32_t wf_packet_size_in_bytes;              //  4 bytes  13
       float return_point_wf_location;                    //  4 bytes  14
       // ---------------------------------------------------------------
       // for extrapolating points along the waveform

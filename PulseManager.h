@@ -3,10 +3,10 @@
 
 #include "Pulse.h"
 #include "Types.h"
+#include "vec3d.h"
 
 #include <unordered_map>
 #include <vector>
-#include <gmtl/Vec.h>
 #include <iomanip>
 
 /// @authors Milto Miltiadou, supported by the Centre for DIgital Entertainment at the University of Bath, and Plymouth Marine Laboratory
@@ -55,9 +55,10 @@ public:
    /// @brief method that sorts the discrete points into the pulses
    //-------------------------------------------------------------------------
    void sortDiscretePoints(
-           const std::vector<gmtl::Vec3f> &m_discretePoints,
+           const std::vector<Vec3d> &m_discretePoints,
            const std::vector<unsigned short> &m_discreteIntensities,
-           const std::vector<int> &m_discreteWaveOffsets
+           const std::vector<int> &m_discreteWaveOffsets,
+           const std::vector<double> &m_discretePointInWaveform
            );
    //-------------------------------------------------------------------------
    /// @brief method that returns the number of pulses;
@@ -82,7 +83,10 @@ public:
    /// @brief default destructor
    //-------------------------------------------------------------------------
    ~PulseManager();
-
+   //-------------------------------------------------------------------------
+   /// @brief return a pointer to the requested pulse object
+   //-------------------------------------------------------------------------
+   Pulse* getPulse(unsigned int i_pulse){if(i_pulse < getNumOfPulses()) {return m_pulses[i_pulse];}else{return NULL;}}
 
 private:
    //-------------------------------------------------------------------------
@@ -110,7 +114,7 @@ private:
    //-------------------------------------------------------------------------
    /// @brief discrete points that are not associated with any waveform
    //-------------------------------------------------------------------------
-   std::vector<gmtl::Vec3f> m_discretePoints;
+   std::vector<Vec3d> m_discretePoints;
    //-------------------------------------------------------------------------
    /// @brief the corresponding intensities of discrete points without
    /// waveform

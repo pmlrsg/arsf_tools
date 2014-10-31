@@ -1,6 +1,6 @@
 #include "PulseManager.h"
 #include <string.h>
-#include <gmtl/gmtl.h>
+
 
 //-----------------------------------------------------------------------------
 PulseManager::PulseManager(
@@ -56,17 +56,17 @@ void PulseManager::addPoint(
         int wave_offset
         )
 {
-   float originZ = i_point.Z*m_public_header.z_scale_factor +
-           (float)i_point.Z_t*i_point.return_point_wf_location;
+   double originZ = i_point.Z*m_public_header.z_scale_factor +
+           (double)i_point.Z_t*i_point.return_point_wf_location;
    if(originZ < 110.f)
    {
       Pulse *pulse = new Pulse(m_public_header,m_wfInfo,i_point,wave_data,wave_offset);
       m_pulses.push_back(pulse);
-      const gmtl::Vec3f &origin = m_pulses[m_pulses.size()-1]->getOrigin();
-      const gmtl::Vec3f &offset = m_pulses[m_pulses.size()-1]->getOffset();
-      gmtl::Vec3f endPoint(offset);
-      endPoint*=(m_wfInfo.number_of_samples);
-      endPoint+=origin;
+      Vec3d origin = m_pulses[m_pulses.size()-1]->getOrigin();
+      Vec3d offset = m_pulses[m_pulses.size()-1]->getOffset();
+      Vec3d endPoint(offset);
+      endPoint=endPoint*(m_wfInfo.number_of_samples);
+      endPoint=endPoint+origin;
       m_public_header.max_x = std::max((double)origin[0],m_public_header.max_x);
       m_public_header.max_x = std::max((double)endPoint[0],m_public_header.max_x);
       m_public_header.max_y = std::max((double)origin[1],m_public_header.max_y);
@@ -82,9 +82,10 @@ void PulseManager::addPoint(
 
 //-----------------------------------------------------------------------------
 void PulseManager::sortDiscretePoints(
-        const std::vector<gmtl::Vec3f> &m_discretePoints,
+        const std::vector<Vec3d> &m_discretePoints,
         const std::vector<unsigned short> &m_discreteIntensities,
-        const std::vector<int> &m_discreteWaveOffsets
+        const std::vector<int> &m_discreteWaveOffsets,
+        const std::vector<double> &m_discretePointInWaveform
         )
 {
    for(unsigned int i=0; i<m_discreteIntensities.size(); ++i)
@@ -96,7 +97,8 @@ void PulseManager::sortDiscretePoints(
       }
       else
       {
-         m_pulses[got->second]->addDiscretePoint(m_discretePoints[i],m_discreteIntensities[i]);
+         m_pulses[got->second]->addDiscretePoint(m_discretePoints[i],
+                        m_discreteIntensities[i],m_discretePointInWaveform[i]);
       }
    }
 }
@@ -106,10 +108,10 @@ void PulseManager::addUnAssociatedDiscretePoint(
         const Types::Data_Point_Record_Format_4 &i_point_info
         )
 {
-    m_discretePoints.push_back(
-                gmtl::Vec3f(i_point_info.X*m_public_header.x_scale_factor,
+    Vec3d dpoint(i_point_info.X*m_public_header.x_scale_factor,
                             i_point_info.Y*m_public_header.y_scale_factor,
-                            i_point_info.Z*m_public_header.z_scale_factor));
+                            i_point_info.Z*m_public_header.z_scale_factor);
+    m_discretePoints.push_back(dpoint);
     m_discreteIntensities.push_back(i_point_info.itensity);
 }
 
@@ -180,4 +182,7 @@ PulseManager::~PulseManager()
    {
       delete m_pulses[i];
    }
+   m_discreteIntensities.resize(0);
+   m_discretePoints.resize(0);
+   m_pulses.resize(0);
 }

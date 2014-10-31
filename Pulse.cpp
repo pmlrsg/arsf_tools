@@ -1,9 +1,7 @@
 #include "Pulse.h"
 #include <iostream>
-#include <gmtl/gmtl.h>
 #include <cstring>
 
-int Pulse::count = 0;
 std::vector<float> Pulse::s_kernel;
 
 //-----------------------------------------------------------------------------
@@ -17,19 +15,19 @@ Pulse::Pulse(
           m_waveOffset(wave_offset)
 {
    // sampling frequency in nanoseconds
-   gmtl::Vec3f point_scale_factors(i_publicHeader.x_scale_factor,
+   Vec3d point_scale_factors(i_publicHeader.x_scale_factor,
                                 i_publicHeader.y_scale_factor,
                                 i_publicHeader.z_scale_factor);
-   gmtl::Vec3f point_offsets(i_publicHeader.x_offset,
+   Vec3d point_offsets(i_publicHeader.x_offset,
                           i_publicHeader.y_offset,
                           i_publicHeader.z_offset);
-   m_origin = gmtl::Vec3f(i_point_info.X*i_publicHeader.x_scale_factor,
+   m_origin.Set(i_point_info.X*i_publicHeader.x_scale_factor,
                      i_point_info.Y*i_publicHeader.y_scale_factor,
                      i_point_info.Z*i_publicHeader.z_scale_factor);
-   m_origin+=point_offsets;
-   m_point = gmtl::Vec3f(i_point_info.X*point_scale_factors[0],
-                         i_point_info.Y*point_scale_factors[1],
-                         i_point_info.Z*point_scale_factors[2]);
+   m_origin=m_origin+point_offsets;
+   m_point.Set(i_point_info.X*point_scale_factors[0] + point_offsets[0],
+                         i_point_info.Y*point_scale_factors[1] + point_offsets[1],
+                         i_point_info.Z*point_scale_factors[2] + point_offsets[2]);
    m_numberOfReturnsForThisPulse =(int)
            (i_point_info.returnNo_noOfRe_scanDirFla_EdgeFLn&7);
    m_time = i_point_info.GBS_time;
@@ -48,14 +46,14 @@ Pulse::Pulse(
    m_pointInWaveform = i_point_info.return_point_wf_location
            *c_light_speed/2/1000;
 
-   m_offset= gmtl::Vec3f(i_point_info.X_t, i_point_info.Y_t, i_point_info.Z_t);
-   m_offset *= (1000 * m_temporalSampleSpacing);
+   m_offset.Set(i_point_info.X_t, i_point_info.Y_t, i_point_info.Z_t);
+   m_offset = m_offset*(1000 * m_temporalSampleSpacing);
 
-   m_origin[0] = m_origin[0] + (double )i_point_info.X_t*
+   m_origin[0] = m_origin[0] - (double )i_point_info.X_t*
            (double )i_point_info.return_point_wf_location;
-   m_origin[1] = m_origin[1] + (double )i_point_info.Y_t*
+   m_origin[1] = m_origin[1] - (double )i_point_info.Y_t*
            (double )i_point_info.return_point_wf_location;
-   m_origin[2] = m_origin[2] + (double )i_point_info.Z_t*
+   m_origin[2] = m_origin[2] - (double )i_point_info.Z_t*
            (double )i_point_info.return_point_wf_location;
    m_returns = new (std::nothrow) char[m_noOfSamples];
    if(m_returns==0)
@@ -64,11 +62,13 @@ Pulse::Pulse(
        exit(EXIT_FAILURE);
    }
    memcpy(m_returns,wave_data,m_noOfSamples);
-   m_discretePoints.push_back(
-               gmtl::Vec3f(i_point_info.X*i_publicHeader.x_scale_factor,
+   Vec3d dpoint(i_point_info.X*i_publicHeader.x_scale_factor,
                            i_point_info.Y*i_publicHeader.y_scale_factor,
-                           i_point_info.Z*i_publicHeader.z_scale_factor));
+                           i_point_info.Z*i_publicHeader.z_scale_factor);
+   m_discretePoints.push_back(dpoint);
    m_discreteIntensities.push_back(i_point_info.itensity);
+   m_discretePointInWaveform.push_back(m_pointInWaveform);
+   m_discreteReturnPointLocation.push_back(m_returnPointLocation);
 }
 
 //-----------------------------------------------------------------------------
@@ -92,7 +92,9 @@ Pulse::Pulse(
     m_offset(i_pulse.m_offset),
     m_origin(i_pulse.m_origin),
     m_discretePoints(i_pulse.m_discretePoints),
-    m_waveOffset(i_pulse.m_waveOffset)
+    m_waveOffset(i_pulse.m_waveOffset),
+    m_discretePointInWaveform(i_pulse.m_discretePointInWaveform),
+    m_discreteReturnPointLocation(i_pulse.m_discreteReturnPointLocation)
 {
    m_returns = new (std::nothrow) char[m_noOfSamples];
    if(m_returns==0)
@@ -102,6 +104,7 @@ Pulse::Pulse(
    }
    memcpy(m_returns,i_pulse.m_returns,m_noOfSamples);
 
+   std::cout<<"Copy pulse constructor"<<std::endl;
 }
 
 
@@ -110,6 +113,7 @@ Pulse::Pulse(
 //-----------------------------------------------------------------------------
 void Pulse::print()const
 {
+   std::cout.precision(10);
    std::cout << "Point                            " << m_point[0] << " " << m_point[1] << " " << m_point[2] << "\n";
    std::cout << "Return Number                    " << m_returnNumber<< "\n";
    std::cout << "Number of returns for this pulse " << m_numberOfReturnsForThisPulse<< "\n";
@@ -129,13 +133,12 @@ void Pulse::print()const
    std::cout << "Waveform Samples: ( x , y , z , I ):\n";
    if(m_returns!=0)
    {
-      gmtl::Vec3f tempPosition = m_origin;
+      Vec3d tempPosition = m_origin;
       for(unsigned short int i=0; i< m_noOfSamples; ++i)
       {
-
          std::cout << "( " << tempPosition[0] << " , " << tempPosition[1] << " , "
                    << tempPosition[2] << " , " <<  (int) m_returns[i] <<  " )\n";
-         tempPosition-=m_offset;
+         tempPosition=tempPosition+m_offset;
       }
       std::cout << "\n";
    }
@@ -146,8 +149,6 @@ void Pulse::print()const
                 << m_discretePoints[i][1] << " , " << m_discretePoints[i][2]
                 << " , " << m_discreteIntensities[i] << "\n";
    }
-
-
 }
 
 //-----------------------------------------------------------------------------
@@ -156,21 +157,21 @@ void Pulse::addDiscretePoint(
         const Types::Data_Point_Record_Format_4 &i_point_info
         )
 {
-   m_discretePoints.push_back(
-               gmtl::Vec3f(i_point_info.X*i_publicHeader.x_scale_factor,
-                           i_point_info.Y*i_publicHeader.y_scale_factor,
-                           i_point_info.Z*i_publicHeader.z_scale_factor));
+   Vec3d dpoint(i_point_info.X*i_publicHeader.x_scale_factor,
+               i_point_info.Y*i_publicHeader.y_scale_factor,
+               i_point_info.Z*i_publicHeader.z_scale_factor);
+   m_discretePoints.push_back(dpoint);
    m_discreteIntensities.push_back(i_point_info.itensity);
 }
 
 //-----------------------------------------------------------------------------
-void Pulse::addDiscretePoint(gmtl::Vec3f i_point, unsigned short i_intensity)
+void Pulse::addDiscretePoint(Vec3d i_point, unsigned short i_intensity,double i_pointInWaveform)
 {
    m_discretePoints.push_back(i_point);
    m_discreteIntensities.push_back(i_intensity);
+   m_discretePointInWaveform.push_back(i_pointInWaveform*c_light_speed/2/1000);
+   m_discreteReturnPointLocation.push_back(i_pointInWaveform/1000);
 }
-
-
 
 //-----------------------------------------------------------------------------
 bool Pulse::isInsideLimits(const std::vector<double> &i_user_limits)const
@@ -179,7 +180,6 @@ bool Pulse::isInsideLimits(const std::vector<double> &i_user_limits)const
           m_point[0]<i_user_limits[2] && m_point[0]>i_user_limits[3];
 }
 
-
 //-----------------------------------------------------------------------------
 Pulse::~Pulse()
 {
@@ -187,4 +187,6 @@ Pulse::~Pulse()
    {
        delete []m_returns;
    }
+   m_discretePoints.resize(0);
+   m_discreteIntensities.resize(0);
 }
