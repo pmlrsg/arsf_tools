@@ -17,7 +17,7 @@
 # writeWaveform: creates waveform files, one file per waveform
 # getUserInput: request user to input area for waveform data extraction
 # readLASWaves: function that extracts waveforms from LAS 1.3 file
-#
+# plotWaveform: function to plot a waveform
 #
 #
 ################
@@ -66,7 +66,8 @@ import os.path
 import struct
 import math
 import warnings
-
+import pylab
+from matplotlib.backends.backend_pdf import PdfPages
 
 public_header_length = 235 # Public Header length in bytes. 
 VbleRec_header_length = 54 # Variable Length Record Header length in bytes 
@@ -248,6 +249,12 @@ def writeWaveform(wavedata,wv_info,output_dir):
   print >>wvfile, "X Offset {0:28} {1}".format("", wavedata[0][15]*1000*sampling) # *1000 to convert from km to meters *sampling to get offset between each sample
   print >>wvfile, "Y Offset {0:28} {1}".format("", wavedata[0][16]*1000*sampling) # *1000 to convert from km to meters *sampling to get offset between each sample
   print >>wvfile, "Z Offset {0:28} {1}".format("", wavedata[0][17]*1000*sampling) # *1000 to convert from km to meters *sampling to get offset between each sample
+
+  #output a warning if the z offset is -ve. This is not necessarily a problem but it could mean that the vector has been
+  #stored in the LAS file incorrectly (opposite signs to standard) as was the case with some LAS files produced with an early version of ALSPP
+  if wavedata[0][17] > 0:
+    print "WARNING: Z offset vector component is positive - this may mean that the vector has been stored in the LAS file with opposite sign to standard."
+    print "If this is the case then waveform and origin positions will be incorrect. If you expect Z to increase from the lidar to the target then this is probably not a problem."
 
   # Calculating origin from: X=xo+x(t)
   xo= w_point[0]- wavedata[0][15]*wavedata[0][14]  
@@ -448,12 +455,14 @@ def getUserInput(headdata):
 #  headdata: header as returned by ReadLASHeader
 #  filename: LAS 1.3 file to extract data from
 #  user_limits: area to be extracted
+#  plottoscreen: whether to plot waveforms to screen
+#  plotfile: name of a pdf file to plot to
 # 
 # Returns:
 #  creates one output filr for waveform named waveform_tttttt_tttttt_x.txt where x indicates the number of return: 1 for first return, 2 for second return...etc"""   
 ##
  
-def readLASWaves(headdata,filename,output_dir,user_limits):
+def readLASWaves(headdata,filename,output_dir,user_limits,plottoscreen=False,plotfile=None):
    
   record = ""  
   tb=None
@@ -479,7 +488,12 @@ def readLASWaves(headdata,filename,output_dir,user_limits):
     print "Reading failed on input LAS file " + filename + "\n"
     sys.exit(1)
   #end try
-       
+
+  if plotfile != None:
+    pdfplots = PdfPages(plotfile) 
+  else:
+    pdfplots=None
+
   #printPubHeader(headdata)
   point_scale_factors.append(headdata[24]) # X scale factor 
   point_scale_factors.append(headdata[25]) # Y scale factor
@@ -643,6 +657,8 @@ def readLASWaves(headdata,filename,output_dir,user_limits):
 
         writeWaveform(wavedata,wv_info,output_dir)
 
+        if plottoscreen != False or plotfile != None:
+          plotWaveform(wavedata,wv_info[3]/1000.0,fileobj=pdfplots,title="waveform_%0.6d_%0.6d_%d.txt"%(int(wavedata[0][10]),int(round((math.modf(wavedata[0][10])[0])*1000000)),int(wavedata[0][4]&7)))
 
         lasfile.seek(tmp) # Goes back to next point in file
 
@@ -650,6 +666,9 @@ def readLASWaves(headdata,filename,output_dir,user_limits):
       #end if
     #end if
   #end for
+
+  if plotfile != None:
+    pdfplots.close()
 
   if count==0:
     print "\nNo wave forms have been found for the specified area"
@@ -679,5 +698,26 @@ def readLASWaves(headdata,filename,output_dir,user_limits):
 
 #end function
 
-
-
+# Function to plot the waveforms either to the screen interactively or to a pdf file
+def plotWaveform(waveform,sampletime,fileobj=None,title=None):
+   #plot the waveform data as a blue line
+   pylab.plot(waveform[1],'b-',label='Waveform')
+   #plot the discrete point as a red circle - x position is return point location, y is intensity
+   pylab.plot(waveform[0][14]/(1000*sampletime),waveform[0][3],'ro',label='Discrete')
+   #add axis labels
+   pylab.xlabel('Sample number')
+   pylab.ylabel('Intensity')
+   #if a title has been given then add it
+   if title != None:
+      pylab.title(title)
+   #set the lower y limit to be 0 and the upper to be 5 higher than it is already
+   pylab.ylim([0,pylab.ylim()[1]+5])
+   #add a basic legend
+   pylab.legend()
+   #if a fileobj has been passed then save the plot to the file
+   #else show it on the screen
+   if fileobj != None:
+      fileobj.savefig()
+      pylab.clf()
+   else:
+      pylab.show()

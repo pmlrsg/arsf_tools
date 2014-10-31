@@ -28,6 +28,8 @@ def main(argv):
   parser.add_argument('-o', metavar = 'output dir', help ='directory to output ASCII files (defaults to current directory if not specified)',default=0)
   parser.add_argument('--area', type=float, nargs=4, metavar =('North', 'South', 'East', 'West'), help = 'limits of area you wish to extract. If not specified you will be asked to enter them interactively on the command line',default= (0,0,0,0))
   parser.add_argument('--header', dest ='print_header', action='store_const', const=1, default=0,help ='outputs the header information of the LAS file')
+  parser.add_argument('--plottoscreen', dest ='plottoscreen', action='store_true', default=False,help ='Plot all waveforms to the screen')
+  parser.add_argument('--plottofile', dest ='plottofile', type=str,nargs=1,default=[None],help ='Plot all waveforms to a PDF file')
 
   args = parser.parse_args()
   user_limits = args.area
@@ -115,7 +117,7 @@ def main(argv):
  #end if 
 
 # run the Las 1.3 extractions  
-  las1_3_handler.readLASWaves(headdata,las_file, output_dir,user_limits)  
+  las1_3_handler.readLASWaves(headdata,las_file, output_dir,user_limits,plottoscreen=args.plottoscreen,plotfile=args.plottofile[0])  
   
 
 main(sys.argv[1:])
