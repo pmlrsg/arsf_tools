@@ -12,14 +12,14 @@ CC       = gcc
 CXX      = g++
 LEX      = flex
 YACC     = yacc
-CFLAGS   = -pipe -Wall -W -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector --param=ssp-buffer-size=4 -grecord-gcc-switches -m64 -mtune=generic -fno-strict-aliasing  -DQT_NO_DEBUG -DQT_SHARED -DQT_TABLET_SUPPORT -DQT_THREAD_SUPPORT
-CXXFLAGS = -pipe -std=gnu++0x -std=c++0x -Wall -W -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector --param=ssp-buffer-size=4 -grecord-gcc-switches -m64 -mtune=generic -fno-strict-aliasing  -DQT_NO_DEBUG -DQT_SHARED -DQT_TABLET_SUPPORT -DQT_THREAD_SUPPORT
+CFLAGS   = -pipe -Wall -W -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector --param=ssp-buffer-size=4 -grecord-gcc-switches -m64 -mtune=generic -fno-strict-aliasing -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE
+CXXFLAGS = -pipe -std=gnu++0x -std=c++0x -O2 -g -Wall -m64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE
 LEXFLAGS = 
 YACCFLAGS= -d
-INCPATH  = -I/usr/lib64/qt-3.3/mkspecs/default -I. -I"/users/rsg/mmi/gmtl-0.6.1/build/include/gmtl-0.6.1/" -I$(QTDIR)/include
+INCPATH  =  -I.
 LINK     = g++
 LFLAGS   = 
-LIBS     = $(SUBLIBS) -L$(QTDIR)/lib -lqt-mt -lXext -lX11 -lm
+LIBS     = $(SUBLIBS) -lm
 AR       = ar cqs
 RANLIB   = 
 MOC      = $(QTDIR)/bin/moc
@@ -48,15 +48,18 @@ OBJECTS_DIR = ./
 HEADERS = Types.h \
 		Las1_3_handler.h \
 		Pulse.h \
-		PulseManager.h
+		PulseManager.h \
+      vec3d.h
 SOURCES = main.cpp \
 		Las1_3_handler.cpp \
 		Pulse.cpp \
-		PulseManager.cpp
+		PulseManager.cpp \
+      vec3d.cpp
 OBJECTS = main.o \
 		Las1_3_handler.o \
 		Pulse.o \
-		PulseManager.o
+		PulseManager.o \
+      vec3d.o
 FORMS = 
 UICDECLS = 
 UICIMPLS = 
@@ -129,22 +132,26 @@ FORCE:
 
 ####### Compile
 
-main.o: main.cpp Las1_3_handler.h \
+main.o: main.cpp vec3d.cpp Las1_3_handler.h \
 		Types.h \
 		PulseManager.h \
-		Pulse.h
-
-Las1_3_handler.o: Las1_3_handler.cpp Las1_3_handler.h \
-		Types.h \
-		PulseManager.h \
-		Pulse.h
-
-Pulse.o: Pulse.cpp Pulse.h \
-		Types.h
-
-PulseManager.o: PulseManager.cpp PulseManager.h \
 		Pulse.h \
-		Types.h
+      vec3d.h
+
+Las1_3_handler.o: Las1_3_handler.cpp vec3d.cpp Las1_3_handler.h \
+		Types.h \
+		PulseManager.h \
+		Pulse.h \
+      vec3d.h
+
+Pulse.o: Pulse.cpp vec3d.cpp Pulse.h \
+		Types.h \
+      vec3d.h
+
+PulseManager.o: PulseManager.cpp vec3d.cpp PulseManager.h \
+		Pulse.h \
+		Types.h \
+      vec3d.h
 
 ####### Install
 
