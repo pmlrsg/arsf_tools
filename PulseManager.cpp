@@ -56,26 +56,21 @@ void PulseManager::addPoint(
         int wave_offset
         )
 {
-   double originZ = i_point.Z*m_public_header.z_scale_factor +
-           (double)i_point.Z_t*i_point.return_point_wf_location;
-   if(originZ < 110.f)
-   {
-      Pulse *pulse = new Pulse(m_public_header,m_wfInfo,i_point,wave_data,wave_offset);
-      m_pulses.push_back(pulse);
-      Vec3d origin = m_pulses[m_pulses.size()-1]->getOrigin();
-      Vec3d offset = m_pulses[m_pulses.size()-1]->getOffset();
-      Vec3d endPoint(offset);
-      endPoint=endPoint*(m_wfInfo.number_of_samples);
-      endPoint=endPoint+origin;
-      m_public_header.max_x = std::max((double)origin[0],m_public_header.max_x);
-      m_public_header.max_x = std::max((double)endPoint[0],m_public_header.max_x);
-      m_public_header.max_y = std::max((double)origin[1],m_public_header.max_y);
-      m_public_header.max_y = std::max((double)endPoint[1],m_public_header.max_y);
-      m_public_header.max_z = std::max((double)origin[2],m_public_header.max_z);
-      m_public_header.max_z = std::max((double)endPoint[2],m_public_header.max_z);
-      std::pair<int,unsigned int> pair(wave_offset,m_pulses.size()-1);
-      myMap.insert(pair);
-   }
+   Pulse *pulse = new Pulse(m_public_header,m_wfInfo,i_point,wave_data,wave_offset);
+   m_pulses.push_back(pulse);
+   Vec3d origin = m_pulses[m_pulses.size()-1]->getOrigin();
+   Vec3d offset = m_pulses[m_pulses.size()-1]->getOffset();
+   Vec3d endPoint(offset);
+   endPoint=endPoint*(m_wfInfo.number_of_samples);
+   endPoint=endPoint+origin;
+   m_public_header.max_x = std::max((double)origin[0],m_public_header.max_x);
+   m_public_header.max_x = std::max((double)endPoint[0],m_public_header.max_x);
+   m_public_header.max_y = std::max((double)origin[1],m_public_header.max_y);
+   m_public_header.max_y = std::max((double)endPoint[1],m_public_header.max_y);
+   m_public_header.max_z = std::max((double)origin[2],m_public_header.max_z);
+   m_public_header.max_z = std::max((double)endPoint[2],m_public_header.max_z);
+   std::pair<int,unsigned int> pair(wave_offset,m_pulses.size()-1);
+   myMap.insert(pair);
 }
 
 
