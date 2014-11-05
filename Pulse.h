@@ -79,7 +79,9 @@ public:
    ~Pulse();
 
 
+   //--------------------------------------------------------------------------
    //Fudge factors for python code: swig - there is a better way but I can't get it to work
+   //--------------------------------------------------------------------------
 
    //Functions for returning waveform
    bool sampleinwf(unsigned int s){if(s<m_noOfSamples){return true;}else{return false;}}
