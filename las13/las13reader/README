@@ -1,0 +1,13 @@
+This library is forked from the LAS1.3Reader available from:  https://github.com/Art-n-MathS/LAS1.3Reader
+It has been edited such that the library is more generalised for use with ARSF and EUFAR projects.
+
+It has only been built and tested under a Fedora 19 linux distribution.
+
+INSTALL
+---------
+
+To build the shared library just run make. Then export the library to the LD_LIBRARY_PATH or move it into a suitable path.
+
+'make test' will create an executable (see src/main.cpp) that can test the library has compiled and is in the run time path.
+
+
