@@ -1,0 +1,31 @@
+This is the las13 library.
+
+Contents:
+	las13reader: C++ library for reading a LAS1.3 file
+	swig: swig scripts for wrapping the las13reader into a python library
+	las13.py: a simplified user friendly interface for the swigged library.
+
+NOTE: You need all of these to have a working version. These have only been built on Fedora 19 distributions.
+
+
+INSTALL
+-------
+
+1. To build the C++ library. Go into the las13reader directory. Then should be as simple as just running make.
+2. To build the swig python library. Go into the swig directory. Then should be as simple as just running make.
+
+Then you need to make sure everything is installed in the correct places.
+e.g. for python make sure that the following files are in your python path:
+ swig/las13reader.py 
+ swig/_las13reader.so
+ las13.py
+
+e.g. for c++ make sure that the following files are available for include:
+ las13reader/src/Las1_3_handler.h
+ las13reader/src/PulseManager.h
+ las13reader/src/Pulse.h
+
+and that the library is available for both compile and runtime (either move it or export it to LD_LIBRARY_PATH):
+ las13reader/liblas13reader.so
+
+
