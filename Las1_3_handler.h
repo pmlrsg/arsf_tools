@@ -58,6 +58,8 @@ public:
    //-------------------------------------------------------------------------
    PulseManager* ReadLikeBook(unsigned int chunksize=1,bool resettostart=false);
 
+   void SetQuiet(bool q){quiet=q;}
+
 protected:
    //-------------------------------------------------------------------------
    /// @brief the name of the LAS file
