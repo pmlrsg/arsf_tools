@@ -13,3 +13,6 @@ las1_3_handler.py:
 
 read_sol_file.py:
    A script / library to read SOL navigation files and write records to an ASCII text file.
+
+las13:
+   A directory containing the las13 library for reading LAS1.3 files. Consists of a C++ library with python bindings.
