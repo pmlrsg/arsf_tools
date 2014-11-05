@@ -1,6 +1,0 @@
-<map id="Las1_3_handler::readFileAndGetPulseManager" name="Las1_3_handler::readFileAndGetPulseManager">
-<area shape="rect" id="node2" href="$class_pulse_manager.html#a62885f8a12c9a4af5680f0ad150e7e88" title="method that adds a fw pulse to the manager" alt="" coords="227,5,389,32"/>
-<area shape="rect" id="node3" href="$class_las1__3__handler.html#a8dd556ea509c155f17ec18917426afd9" title="method that reads public header block" alt="" coords="237,57,379,98"/>
-<area shape="rect" id="node4" href="$class_las1__3__handler.html#a61984668b12f4122923adde7cdeb885b" title="method that reads variable length records including waveform packet descriptors (up to 255)..." alt="" coords="226,122,390,163"/>
-<area shape="rect" id="node5" href="$class_pulse_manager.html#a3f64d9a5116d4dd7dff498cb265a6672" title="method that sorts the discrete points into the pulses" alt="" coords="219,187,397,229"/>
-</map>
