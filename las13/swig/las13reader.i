@@ -12,6 +12,8 @@
 %include "std_string.i"
 %include "std_map.i"
 %include "../las13reader/src/Las1_3_handler.h" 
+/*Rename must be before the class that is being wrapped - this line renames [] to __getitem__ for python*/
+%rename(__getitem__) PulseManager::operator[];
 %include "../las13reader/src/PulseManager.h" 
 %include "../las13reader/src/Pulse.h" 
 

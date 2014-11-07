@@ -86,7 +86,7 @@ public:
    //-------------------------------------------------------------------------
    /// @brief return a pointer to the requested pulse object
    //-------------------------------------------------------------------------
-   Pulse* getPulse(unsigned int i_pulse){if(i_pulse < getNumOfPulses()) {return m_pulses[i_pulse];}else{return NULL;}}
+   Pulse* operator[](unsigned int i){if(i < getNumOfPulses()) {return m_pulses[i];}else{return NULL;}}
 
 private:
    //-------------------------------------------------------------------------
