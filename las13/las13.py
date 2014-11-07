@@ -198,17 +198,4 @@ class las13():
          pylab.clf()
       fileobj.close()
 
-if __name__ == "__main__":
-   las=las13("../../../testscripts/LDR-FW-FW10_01-2010-098-01.LAS")
-   bounds=[103000.0,102995.0,432915.0,432920.0]
-   pmanager=las.points_in_bounds(bounds)
-   #las.quick_plot_pulse(pmanager.getPulse(20),title="Hello!")
-
-   print "Point origin: ",las13.get_pulse_info(pmanager.getPulse(20),'origin')
-   print "Point offset: ",las13.get_pulse_info(pmanager.getPulse(20),'offset')
-
-   las13.plot_all_pulses(pmanager,'/tmp/pulses.pdf')
-
-   las.tidy()
-   #print las13.get_pulse_info(pmanager.getPulse(20),'origin')
 
