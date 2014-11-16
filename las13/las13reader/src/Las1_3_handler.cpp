@@ -124,6 +124,8 @@ PulseManager* Las1_3_handler::ReadLikeBook(unsigned int chunksize,bool resettost
    std::vector<int> discreteWaveOffsets;
    // the corresponding offset in the waveform
    std::vector<double> discretePointInWaveform;
+   // the corresponding classification
+   std::vector<int> discreteClassification;
 
    //For each point in the chunksize
    for(unsigned int i=0;i<chunksize;i++)
@@ -134,10 +136,10 @@ PulseManager* Las1_3_handler::ReadLikeBook(unsigned int chunksize,bool resettost
       }
       //Handle the point
       HandlePoint(point_info,count,pmanager_book,discretePoints,discreteIntensities,discreteWaveOffsets,
-                  discretePointInWaveform,countDiscrete,countIgnored);
+                  discretePointInWaveform,discreteClassification,countDiscrete,countIgnored);
    }
    //Try and sort out the discrete points
-   pmanager_book->sortDiscretePoints(discretePoints,discreteIntensities,discreteWaveOffsets,discretePointInWaveform);
+   pmanager_book->sortDiscretePoints(discretePoints,discreteIntensities,discreteWaveOffsets,discretePointInWaveform,discreteClassification);
 
    return pmanager_book;
 }
@@ -165,6 +167,7 @@ PulseManager* Las1_3_handler::GetPointsInBounds(float boundsn,float boundss,floa
    // the corresponding wave offsets of the dicrete points
    std::vector<int> discreteWaveOffsets;
    std::vector<double> discretePointInWaveform;
+   std::vector<int> discreteClassification;
 
    if((boundsn < boundss)||(boundse < boundsw))
    {
@@ -183,7 +186,8 @@ PulseManager* Las1_3_handler::GetPointsInBounds(float boundsn,float boundss,floa
       //if the point is within the bounds
       if((pointx<boundse)&&(pointx>boundsw)&&(pointy<boundsn)&&(pointy > boundss))
       {
-         HandlePoint(point_info,count,i_pulseManager,discretePoints,discreteIntensities,discreteWaveOffsets,discretePointInWaveform,countDiscrete,countIgnored);
+         HandlePoint(point_info,count,i_pulseManager,discretePoints,discreteIntensities,
+               discreteWaveOffsets,discretePointInWaveform,discreteClassification,countDiscrete,countIgnored);
       }
    }
    if(!quiet)
@@ -200,7 +204,7 @@ PulseManager* Las1_3_handler::GetPointsInBounds(float boundsn,float boundss,floa
       }
    }
 
-   i_pulseManager->sortDiscretePoints(discretePoints,discreteIntensities,discreteWaveOffsets,discretePointInWaveform);
+   i_pulseManager->sortDiscretePoints(discretePoints,discreteIntensities,discreteWaveOffsets,discretePointInWaveform,discreteClassification);
 
    //clear any flags from the reader
    lasfile.clear();
@@ -232,7 +236,7 @@ PulseManager* Las1_3_handler::GetPointsWithClassification(int classvalue)
    std::vector<int> discreteWaveOffsets;
    // the corresponding offset in the waveform
    std::vector<double> discretePointInWaveform;
-
+   std::vector<int> discreteClassification;
    //if -ve class value then will get all points
    if(classvalue < 0)
    {
@@ -249,7 +253,7 @@ PulseManager* Las1_3_handler::GetPointsWithClassification(int classvalue)
       //If the point has the classification specified
       if(((int)point_info.classification==classvalue)||(classvalue < 0))
       {
-         HandlePoint(point_info,count,i_pulseManager,discretePoints,discreteIntensities,discreteWaveOffsets,discretePointInWaveform,countDiscrete,countIgnored);
+         HandlePoint(point_info,count,i_pulseManager,discretePoints,discreteIntensities,discreteWaveOffsets,discretePointInWaveform,discreteClassification,countDiscrete,countIgnored);
       }
    }
 
@@ -268,7 +272,7 @@ PulseManager* Las1_3_handler::GetPointsWithClassification(int classvalue)
    }
 
    i_pulseManager->sortDiscretePoints(
-               discretePoints,discreteIntensities,discreteWaveOffsets,discretePointInWaveform);
+               discretePoints,discreteIntensities,discreteWaveOffsets,discretePointInWaveform,discreteClassification);
 
    //clear any flags from the reader
    lasfile.clear();
@@ -278,7 +282,8 @@ PulseManager* Las1_3_handler::GetPointsWithClassification(int classvalue)
 //Function to handle the points (used in pulseManager returning functions)
 void Las1_3_handler::HandlePoint(Types::Data_Point_Record_Format_4& point_info,unsigned int& count,
                   PulseManager* i_pulseManager,std::vector<Vec3d>& discretePoints,std::vector<unsigned short>&  discreteIntensities,
-                  std::vector<int>& discreteWaveOffsets,std::vector<double>& discretePointInWaveform,unsigned int& countDiscrete,unsigned int& countIgnored)
+                  std::vector<int>& discreteWaveOffsets,std::vector<double>& discretePointInWaveform,
+                  std::vector<int>& discreteClassification,unsigned int& countDiscrete,unsigned int& countIgnored)
 {   
    //Get the wave offset
    unsigned int wave_offset = public_header.start_of_wf_data_Packet_record + point_info.byte_offset_to_wf_packet_data;
@@ -315,7 +320,7 @@ void Las1_3_handler::HandlePoint(Types::Data_Point_Record_Format_4& point_info,u
       discreteIntensities.push_back(point_info.itensity);
       discreteWaveOffsets.push_back(wave_offset);
       discretePointInWaveform.push_back(point_info.return_point_wf_location);
-
+      discreteClassification.push_back((int)point_info.classification);
       countDiscrete++;
       // no waveform associated with the data
    }

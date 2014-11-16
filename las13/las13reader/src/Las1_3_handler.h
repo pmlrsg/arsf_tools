@@ -120,6 +120,7 @@ private:
    void HandlePoint(Types::Data_Point_Record_Format_4& point_info,unsigned int& count,
                   PulseManager* i_pulseManager,std::vector<Vec3d>& discretePoints,std::vector<unsigned short>&  discreteIntensities,
                   std::vector<int>& discreteWaveOffsets,std::vector<double>& discretePointInWaveform,
+                  std::vector<int>& discreteClassification,
                   unsigned int& countDiscrete,unsigned int& countIgnored);
 
    //-------------------------------------------------------------------------

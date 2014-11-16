@@ -80,7 +80,8 @@ void PulseManager::sortDiscretePoints(
         const std::vector<Vec3d> &m_discretePoints,
         const std::vector<unsigned short> &m_discreteIntensities,
         const std::vector<int> &m_discreteWaveOffsets,
-        const std::vector<double> &m_discretePointInWaveform
+        const std::vector<double> &m_discretePointInWaveform,
+        const std::vector<int> &m_discreteClassification
         )
 {
    for(unsigned int i=0; i<m_discreteIntensities.size(); ++i)
@@ -93,7 +94,7 @@ void PulseManager::sortDiscretePoints(
       else
       {
          m_pulses[got->second]->addDiscretePoint(m_discretePoints[i],
-                        m_discreteIntensities[i],m_discretePointInWaveform[i]);
+                        m_discreteIntensities[i],m_discretePointInWaveform[i],m_discreteClassification[i]);
       }
    }
 }
