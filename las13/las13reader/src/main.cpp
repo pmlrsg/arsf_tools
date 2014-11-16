@@ -14,15 +14,18 @@ int main (int argc, char const* argv[])
       std::string filename=argv[1];
       Las1_3_handler lasHandler(filename);
 
-      PulseManager *p = lasHandler.GetPointsWithClassification(7);
+      PulseManager *p = lasHandler.GetPointsWithClassification(1);
    //   PulseManager *p = lasHandler.GetPointsInBounds(103000.0,102995.0,432915.0,432920.0);
       std::cout << "the pulse manager has : " << p->getNumOfPulses() << " pulses\n";
 
       Pulse* pulse=(*p)[0];
       if(pulse!=NULL)
       {
-         std::cout<<pulse->originXYZ().size()<<std::endl;
-         std::cout<<" "<<pulse->originXYZ()[0]<<" "<<pulse->originXYZ()[1]<<" "<<pulse->originXYZ()[2]<<std::endl; 
+         //std::cout<<pulse->originXYZ().size()<<std::endl;
+         std::cout<<" "<<pulse->sampleXYZ(0)[0]<<" "<<pulse->sampleXYZ(0)[1]<<" "<<pulse->sampleXYZ(0)[2]<<std::endl; 
+         std::cout<<" "<<pulse->sampleXYZ(255)[0]<<" "<<pulse->sampleXYZ(255)[1]<<" "<<pulse->sampleXYZ(255)[2]<<std::endl; 
+         std::cout<<" "<<std::endl;
+         (*p)[2]->print();
       }
 
    //   PulseManager *p =NULL;
