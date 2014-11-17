@@ -3,6 +3,7 @@
 
 #include<cstdlib>
 #include<vector>
+#include<iostream>
 
 class Vec3d
 {
@@ -23,8 +24,17 @@ public:
    Vec3d operator+(const Vec3d &v);
    Vec3d operator-(const Vec3d &v);
    Vec3d& operator=(const Vec3d &v);
-   Vec3d& operator*(const Vec3d &v);
-   Vec3d& operator*(const double d);
+   Vec3d operator*(const Vec3d &v);
+   template<class T>
+   Vec3d operator*(const T d)
+   {
+      Vec3d result;
+      for(int i=0;i<3;i++)
+      {
+         result.data[i]=data[i]*d;
+      } 
+      return result;
+   }
 
    double operator [](int i)const{return data[i];}
    double &operator [](int i){return data[i];}
@@ -44,5 +54,12 @@ public:
 private:
    double* data;
 };
+
+//Wrapper to allow multiplication by scalar on the left hand side
+template <class T>
+Vec3d operator*(T const scalar, Vec3d& rhs)
+{ 
+   return (rhs*scalar);
+}
 
 #endif

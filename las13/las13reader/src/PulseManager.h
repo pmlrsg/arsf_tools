@@ -58,7 +58,8 @@ public:
            const std::vector<Vec3d> &m_discretePoints,
            const std::vector<unsigned short> &m_discreteIntensities,
            const std::vector<int> &m_discreteWaveOffsets,
-           const std::vector<double> &m_discretePointInWaveform
+           const std::vector<double> &m_discretePointInWaveform,
+           const std::vector<int> &m_discreteClassification
            );
    //-------------------------------------------------------------------------
    /// @brief method that returns the number of pulses;

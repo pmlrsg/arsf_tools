@@ -49,7 +49,8 @@ public:
    //--------------------------------------------------------------------------
    void addDiscretePoint(Vec3d i_point,
            unsigned short i_intensity,
-            double i_pointInWaveform
+            double i_pointInWaveform,
+            int i_class
            );
    //--------------------------------------------------------------------------
    /// @brief method that prints all the attributes associated with this pulse
@@ -80,20 +81,20 @@ public:
 
 
    //--------------------------------------------------------------------------
-   //Fudge factors for python code: swig - there is a better way but I can't get it to work
+   //Functions for python code (getters): swig - there is a better way but I can't get it to work
    //--------------------------------------------------------------------------
 
    //Functions for returning waveform
    bool sampleinwf(unsigned int s){if(s<m_noOfSamples){return true;}else{return false;}}
    int sampleintensity(unsigned int sample){if(sampleinwf(sample)){return m_returns[sample];}else{return 0;}}
-   std::vector<double> sampleXYZ(unsigned int sample){if(sampleinwf(sample)){return (m_origin+(m_offset*sample)).AsStdVector();}else{return std::vector<double>(3,0);}}
+   std::vector<double> sampleXYZ(unsigned int sample);
 
    //Functions for returning other data
    double time(){return m_time;}
-   int nreturns(){return (int)m_numberOfReturnsForThisPulse;}
+   int nreturns(){return m_numberOfReturnsForThisPulse;}
    int nsamples(){return m_noOfSamples;}
-   int classification(){return (int)m_classification;}
-   int scanangle(){return (int)m_scanAngle;}
+   std::vector<int> classification(){return m_discreteClassification;}
+   int scanangle(){return m_scanAngle;}
    std::vector<double> pointinwaveform(){return m_discretePointInWaveform;}
    std::vector<double> returnpointlocation(){return m_discreteReturnPointLocation;}
    std::vector<int> discreteintensities(){return m_discreteIntensities;}
@@ -110,13 +111,13 @@ private:
 
    Vec3d m_point;
 
-   char m_returnNumber;
+   int m_returnNumber;
 
-   char m_numberOfReturnsForThisPulse;
+   int m_numberOfReturnsForThisPulse;
 
    double m_time;
 
-   char m_scanAngle;
+   int m_scanAngle;
    // ---------------------------------------------------------------
    //  0 created, never classified
    //  1 Unclassified
@@ -132,7 +133,7 @@ private:
    // 12 overlap points
    // 13-31 reserved for ASPRS definition
    // ---------------------------------------------------------------
-   char m_classification;
+   //int m_classification;
 
    double m_temporalSampleSpacing;
 
@@ -146,9 +147,8 @@ private:
 
    double m_sampleLength;
 
-   double m_returnPointLocation;
-
-   double m_pointInWaveform;
+   //double m_returnPointLocation;
+   //double m_pointInWaveform;
 
    Vec3d m_offset;
 
@@ -175,9 +175,9 @@ private:
    //-------------------------------------------------------------------------
    int m_waveOffset;
 
-
    std::vector<double> m_discretePointInWaveform;
    std::vector<double> m_discreteReturnPointLocation;
+   std::vector<int> m_discreteClassification;
 
 
 };
