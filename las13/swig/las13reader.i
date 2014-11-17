@@ -28,6 +28,7 @@ namespace std {
     %template(vector_int) vector<int>;
     %template(vector_double) vector<double>;
     %template(vector_float) vector<float>;
+    %template(vector_vector) vector< vector<double> >;
 } 
 
 
