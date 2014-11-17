@@ -118,6 +118,17 @@ class las13():
 
       return waveform
 
+   @staticmethod
+   def discrete(pulse):
+      """
+      Function to return the discrete point information from the given pulse
+      """
+      discrete=[]
+      for r in range(0,pulse.nreturns()):
+         discrete.append(discretepoint(pulse,r))
+      return discrete
+
+
    #Function to return some (requested) info about the given pulse
    @staticmethod
    def get_pulse_info(pulse,keyword):
@@ -146,7 +157,7 @@ class las13():
       elif keyword == 'scanangle':
          return pulse.scanangle()  
       elif keyword == 'classification':
-         return pulse.classification() 
+         return list(pulse.classification())
       elif keyword == 'returnlocs':
          return list(pulse.returnpointlocation()) 
       elif keyword == 'disint':
@@ -200,5 +211,47 @@ class las13():
          fileobj.savefig()
          pylab.clf()
       fileobj.close()
+
+
+class dpoint():
+   """
+   Simple helper class to describe a points position in X,Y,Z
+   """
+   def __init__(self,dposition):
+      self.X=dposition[0]
+      self.Y=dposition[1]
+      self.Z=dposition[2]
+
+class discretepoint():
+   """
+   Class to hold information on discrete points in a user friendly interface
+   """
+   def __init__(self,pulse,item):
+      if not isinstance(pulse,las13reader.Pulse):
+         raise Exception("Parameter 'pulse' should be of type las13reader.Pulse in discretepoint object")
+
+      if not isinstance(item,int):
+         raise Exception("Parameter 'item' should be of type integer in discretepoint object")
+
+      #get the number of returns
+      self.returns=pulse.nreturns()
+      if item >= self.returns:
+         raise Exception("Cannot create a discretepoint for return %d when only %d returns for given pulse"%(item,self.returns))
+
+      #get all the discrete points
+      points=list(pulse.discretepoints())
+      #now convert and store as 'dpoint' object
+      self.position=dpoint(points[item])
+      #intensity
+      self.intensity=list(pulse.discreteintensities())[item]
+      #classification
+      self.classification=list(pulse.classification())[item]
+      #return number
+      self.returnnumber=item
+
+
+
+
+
 
 
