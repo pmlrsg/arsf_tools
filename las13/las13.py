@@ -131,6 +131,8 @@ class las13():
       Returns:
          the requested data
       """
+      keywords=['time','nreturns','nsamples','origin','offset','scanangle','classification','returnlocs','disint']
+
       if keyword == 'time':
          return pulse.time()
       elif keyword == 'nreturns':
@@ -150,7 +152,8 @@ class las13():
       elif keyword == 'disint':
          return list(pulse.discreteintensities()) 
       else:
-         raise Exception("Unrecognised keyword in get_pulse_info: %s"%keyword)
+         print "Keyword should be one of: ",keywords
+         raise Exception("Unrecognised keyword in get_pulse_info: %s."%(keyword))
 
    #Function to plot the pulse
    @staticmethod
@@ -185,7 +188,7 @@ class las13():
       """
       fileobj=PdfPages(filename)
       for p in range(pulsemanager.getNumOfPulses()):
-         pulse=pulsemanager.getPulse(p)
+         pulse=pulsemanager[p]
          waveform=las13.waveform(pulse)
          pylab.plot(waveform['intensity'],'b-',label='Waveform')   
          pylab.plot( [x / pulse.sampletime() for x in las13.get_pulse_info(pulse,'returnlocs')],las13.get_pulse_info(pulse,'disint'),'ro',label='Discrete')
