@@ -14,7 +14,7 @@ if os.name=='nt':
                            sources=['las13reader_wrap.cxx', '../las13reader/src/Las1_3_handler.cpp',
                                  '../las13reader/src/Pulse.cpp','../las13reader/src/PulseManager.cpp','../las13reader/src/vec3d.cpp'],
                            extra_compile_args=["-std=c++0x"],
-                           extra_link_args=["-lstdc++","-lgcc"]
+                           extra_link_args=["-lstdc++","-lgcc","-static"]
                            )
 
 else:
