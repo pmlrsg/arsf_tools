@@ -35,10 +35,10 @@ $(LIBNAME): $(OBJECTS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm $(OBJECTS)
+	rm -rf $(OBJECTS)
 
 cleanall:
-	rm  $(LIBNAME) $(TESTEXE) $(OBJECTS)
+	rm  -rf $(LIBNAME) $(TESTEXE) $(OBJECTS)
 
 #test executable to see if lib compiled ok
 test:
