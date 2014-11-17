@@ -1,5 +1,5 @@
 all:
-	swig -Wall -c++ -python  las13reader.i
+	swig -Wall -c++ -python las13reader.i
 	python setup.py build_ext --inplace
 
 clean:
