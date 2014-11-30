@@ -1,6 +1,8 @@
 #ifndef VEC3D_H
 #define VEC3D_H
 
+//The code is released under the GNU General Public License v3.0.
+
 #include<cstdlib>
 #include<vector>
 #include<iostream>
@@ -10,7 +12,7 @@ class Vec3d
 public:
    Vec3d(){data=new double[3];Set(0,0,0);}
    Vec3d(double a,double b,double c){data=new double[3];Set(a,b,c);}
-   Vec3d(const Vec3d& copy){data=new double[3];data[0]=copy[0];data[1]=copy[1];data[2]=copy[2];}
+   Vec3d(const Vec3d& copy){data=new double[3];data[0]=copy.data[0];data[1]=copy.data[1];data[2]=copy.data[2];}
 
    ~Vec3d()
    {
