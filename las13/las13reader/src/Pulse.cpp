@@ -198,3 +198,13 @@ std::vector<double> Pulse::sampleXYZ(unsigned int sample)
       return std::vector<double>(3,0);
    }
 }
+
+std::vector< std::vector<double> > Pulse::discretepoints()
+{
+   std::vector<std::vector<double>> retval;
+   for(unsigned int i=0;i<m_discretePoints.size();i++)
+   {
+      retval.push_back(m_discretePoints[i].AsStdVector());
+   }
+   return retval;
+}

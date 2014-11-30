@@ -6,9 +6,19 @@ setup.py file for las13reader
 """
 
 from distutils.core import setup, Extension
+import os
 
+#if windows then statically link the libstdc++ and libgcc - this assumes using mingw32 to compile
+if os.name=='nt':
+   las13reader_module = Extension('_las13reader',
+                           sources=['las13reader_wrap.cxx', '../las13reader/src/Las1_3_handler.cpp',
+                                 '../las13reader/src/Pulse.cpp','../las13reader/src/PulseManager.cpp','../las13reader/src/vec3d.cpp'],
+                           extra_compile_args=["-std=c++0x"],
+                           extra_link_args=["-lstdc++","-lgcc","-static"]
+                           )
 
-las13reader_module = Extension('_las13reader',
+else:
+   las13reader_module = Extension('_las13reader',
                            sources=['las13reader_wrap.cxx', '../las13reader/src/Las1_3_handler.cpp',
                                  '../las13reader/src/Pulse.cpp','../las13reader/src/PulseManager.cpp','../las13reader/src/vec3d.cpp'],
                            extra_compile_args=["-std=c++0x"]

@@ -98,6 +98,7 @@ public:
    std::vector<double> pointinwaveform(){return m_discretePointInWaveform;}
    std::vector<double> returnpointlocation(){return m_discreteReturnPointLocation;}
    std::vector<int> discreteintensities(){return m_discreteIntensities;}
+   std::vector< std::vector<double> > discretepoints();
    std::vector<double> originXYZ(){return m_origin.AsStdVector();}
    std::vector<double> offsetXYZ(){return m_offset.AsStdVector();}
    const double sampletime()const{return m_temporalSampleSpacing;}

@@ -26,6 +26,10 @@ int main (int argc, char const* argv[])
          std::cout<<" "<<pulse->sampleXYZ(255)[0]<<" "<<pulse->sampleXYZ(255)[1]<<" "<<pulse->sampleXYZ(255)[2]<<std::endl; 
          std::cout<<" "<<std::endl;
          (*p)[2]->print();
+         std::vector<std::vector<double> > discretes=(*p)[2]->discretepoints();
+         std::cout<<discretes.size()<<std::endl;
+         std::cout<<discretes[0][0]<<" "<<discretes[0][1]<<" "<<discretes[0][2]<<" "<<std::endl;
+         std::cout<<discretes[1][0]<<" "<<discretes[1][1]<<" "<<discretes[1][2]<<" "<<std::endl;
       }
 
    //   PulseManager *p =NULL;
