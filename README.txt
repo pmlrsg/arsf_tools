@@ -16,3 +16,6 @@ read_sol_file.py:
 
 las13:
    A directory containing the las13 library for reading LAS1.3 files. Consists of a C++ library with python bindings.
+
+assign_projection.py:
+   A script to assign missing projection information to a GDAL dataset. Requires GDAL Python bindings.
