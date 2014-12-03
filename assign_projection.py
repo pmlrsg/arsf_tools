@@ -217,7 +217,6 @@ if __name__ == '__main__':
             print("ERROR: must provide one of '--baseimage','--wkt','--proj4' or '--epsg'")
             sys.exit(1)
    except Exception as err:
-      raise
       print(err)
       sys.exit(1)
 
