@@ -175,8 +175,9 @@ def assign_from_epsg_code(in_image, epsg_code):
 if __name__ == '__main__':
    parser = argparse.ArgumentParser(description='''Assign missing projection information to a GDAL dataset. 
                                              Note this script does not reproject data it 
-                                             only adds an existing projection in format GDAL can recognise. 
-                                             Created by ARSF-DAN''')
+                                             only adds an existing projection in a format GDAL can recognise. 
+                                             Created by ARSF-DAN at Plymouth Marine Laboratory. 
+                                             Latest version available from https://github.com/pmlrsg/arsf_tools/.''')
    parser.add_argument("inputfile", nargs='+',type=str, help="Input Files(s)")
    parser.add_argument("-b", "--baseimage", type=str, 
                        help="Copy projection information from specified image", 
