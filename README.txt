@@ -19,3 +19,11 @@ las13:
 
 assign_projection.py:
    A script to assign missing projection information to a GDAL dataset. Requires GDAL Python bindings.
+
+get_info_from_header.py
+   A script to print information from a header file and optionally save wavelengths to a CSV file.
+
+copy_header_info.py
+   Copy selected keys from one header to another.
+
+
