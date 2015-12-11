@@ -34,6 +34,14 @@ See separate [README](las13/README) for more details.
 A script to attribute LAS files with colours from an image (e.g., hyperspectral data).
 Requires GDAL python bindings and [laspy](https://github.com/grantbrown/laspy).
 
+**ARSF DEM Scripts**
+
+Scripts to create Digital Elevation Models (DEMs) from LiDAR data are housed in a separate repository: https://github.com/pmlrsg/arsf_dem_scripts
+
+**LiDAR Analysis GUI**
+
+Our inhouse LiDAR visualisation tool is available from https://github.com/arsf/lag
+
 Hyperspectral
 --------------
 
@@ -49,6 +57,10 @@ A script to print information from a header file and optionally save wavelengths
 
 Copy selected keys from one header to another.
 
+**Airborne Processing Library (APL)**
+
+Library for processing hyperspectral data. Available from https://github.com/arsf/apl
+
 Other
 ------
 
@@ -56,3 +68,6 @@ Other
 
 A script / library to read SOL navigation files and write records to an ASCII text file.
 
+**ARSF on JASMIN**
+
+Scripts for running ARSF on the [JASMIN](http://jasmin.ac.uk/) system are available from https://github.com/arsf/arsf_on_jasmin
