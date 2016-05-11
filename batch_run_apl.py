@@ -64,7 +64,7 @@ def run_line_in_apl(line_parameters):
    except Exception as err:
       print("Error running:")
       print(" ".join(aplmask_cmd))
-      sys.exit(1)
+      raise
 
    print("2 - Creating IGM file")
    aplcorr_cmd = ["aplcorr",
@@ -80,7 +80,7 @@ def run_line_in_apl(line_parameters):
    except Exception as err:
       print("Error running:")
       print(" ".join(aplcorr_cmd))
-      sys.exit(1)
+      raise
 
    print("3 - Transforming IGM file")
    apltran_cmd = ["apltran",
@@ -93,7 +93,7 @@ def run_line_in_apl(line_parameters):
    except Exception as err:
       print("Error running:")
       print(" ".join(apltran_cmd))
-      sys.exit(1)
+      raise
 
    print("4 - Mapping file")
    aplmap_cmd = ["aplmap",
@@ -112,7 +112,7 @@ def run_line_in_apl(line_parameters):
    except Exception as err:
       print("Error running:")
       print(" ".join(aplmap_cmd))
-      sys.exit(1)
+      raise
 
 def get_line_parameters(level1b_file, mask_directory, nav_directory, outproj,
                         dem_file,
@@ -165,10 +165,8 @@ def get_line_parameters(level1b_file, mask_directory, nav_directory, outproj,
    if outproj.strip().lower() == "osng":
       line_parameters["output_projection"] = "osng {}".format(OSTN02_NTV2_BIN_FILE)
       if OSTN02_NTV2_BIN_FILE is None or not os.path.isfile(OSTN02_NTV2_BIN_FILE):
-         print("Could not find 'OSTN02_NTV2_BIN_FILE'. This file is required"
-               "for accurate reprojection.",
-               file=sys.stderr)
-         sys.exit(1)
+         raise Exception("Could not find 'OSTN02_NTV2_BIN_FILE'. This file is "
+                         "required for accurate reprojection.")
 
    line_parameters["outputdatatype"] = data_type
    line_parameters["pixel_size"] = str(pixel_size)
@@ -191,9 +189,11 @@ def get_line_parameters(level1b_file, mask_directory, nav_directory, outproj,
             elif l1b_basename[0] == "h" and check_fov_vector.find("hawk") > -1:
                fov_vectors = check_fov_vector
          if fov_vectors is None:
-            print("Couldn't find FOV vectors. You need to provide them using "
-                  "'--view_vectors'", file=sys.stderr)
-            sys.exit(1)
+            raise Exception("Couldn't find FOV vectors. You need to provide "
+                            "them using '--view_vectors'")
+      elif len(fov_vectors_list) > 2:
+         raise Exception("Found more than one FOV vector. Need to specify using"
+                         "'--view_vectors'")
       else:
          fov_vectors = fov_vectors_list[0]
    else:
