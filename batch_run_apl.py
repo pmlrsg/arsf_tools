@@ -74,7 +74,7 @@ def run_line_in_apl(line_parameters):
                   "-navfile", line_parameters["navigation_filename"],
                   "-dem", line_parameters["dem_file"]]
    if line_parameters["atmos_filename"] is not None:
-      aplcorr_cmd.extend(["-atmosfile", line_parameters["atoms_filename"]])
+      aplcorr_cmd.extend(["-atmosfile", line_parameters["atmos_filename"]])
    try:
       subprocess.check_call(aplcorr_cmd)
    except Exception as err:
@@ -217,7 +217,7 @@ def get_line_parameters(level1b_file, mask_directory, nav_directory, outproj,
    else:
       line_parameters["rowcol_filename"] = None
    if atmosfile:
-      line_parameters["atoms_filename"] = os.path.join(output_dir,
+      line_parameters["atmos_filename"] = os.path.join(output_dir,
                                                    l1b_basename + "_geom.bil")
    else:
       line_parameters["atmos_filename"] = None
