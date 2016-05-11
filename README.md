@@ -57,6 +57,10 @@ A script to print information from a header file and optionally save wavelengths
 
 Copy selected keys from one header to another.
 
+**batch_run_apl.py**
+
+A script to batch map level 1b files to level 3b using APL.
+
 **Airborne Processing Library (APL)**
 
 Library for processing hyperspectral data. Available from https://github.com/arsf/apl
