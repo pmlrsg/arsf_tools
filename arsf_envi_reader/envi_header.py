@@ -79,7 +79,8 @@ def read_hdr_file(hdrfilename):
          # Split line on first equals sign
          if re.search("=", currentline) is not None:
             linesplit = re.split("=", currentline, 1)
-            key = linesplit[0].strip()
+            # Convert all values to lower case
+            key = linesplit[0].strip().lower()
             value = linesplit[1].strip()
 
             # If value starts with an open brace, it's the start of a block
@@ -124,8 +125,12 @@ def write_envi_header(filename, header_dict):
 
    hdrfile.write("ENVI\n")
    for key in header_dict.keys():
-      # Write key at start of line
-      hdrfile.write("{} = {}\n".format(key, header_dict[key]))
+      # If it contains commas likely a list so put in curly braces
+      if str(header_dict[key]).count(',') > 0:
+         hdrfile.write("{} = {{{}}}\n".format(key, header_dict[key]))
+      else:
+         # Write key at start of line
+         hdrfile.write("{} = {}\n".format(key, header_dict[key]))
 
    hdrfile.close()
 

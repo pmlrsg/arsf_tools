@@ -22,11 +22,23 @@ import collections
 import numpy
 from . import envi_header
 
+# Try to import c++ arsf binaryreader (faster)
+HAVE_ARSF_BINARYREADER = False
+try:
+   import binfile
+   HAVE_ARSF_BINARYREADER = True
+except ImportError:
+   pass
+
+
 class BilReader(collections.Iterator):
    """
    Class to read ENVI BIL file line at a time
 
    For each line returns a numpy array bands*samples
+
+   If arsf_binaryreader (https://github.com/arsf/arsf_binaryreader) is available
+   will use this. If not will use NumPy
 
    Example::
 
@@ -53,7 +65,12 @@ class BilReader(collections.Iterator):
 
    """
    def __init__(self, input_file):
-      self.file_handler = open(input_file, "rb")
+      if HAVE_ARSF_BINARYREADER:
+         self.binreader_file = binfile.BinFile(input_file)
+         self.file_handler = None
+      else:
+         self.file_handler = open(input_file, "rb")
+         self.binreader_file = None
 
       header_file = envi_header.find_hdr_file(input_file)
       hdr_data_dict = envi_header.read_hdr_file(header_file)
@@ -70,18 +87,31 @@ class BilReader(collections.Iterator):
       self.byte_size = numpy.dtype(self.numpy_dtype).itemsize
       self.line_size = self.samples * self.bands * self.byte_size
       self.hdr_data_dict = hdr_data_dict
+      self.current_line = -1
 
    def __next__(self):
-      line = numpy.fromstring(self.file_handler.read(self.line_size),
-                              dtype=self.numpy_dtype)
-      if line.size < (self.bands * self.samples):
+      self.current_line +=1
+
+      # Check if the line is within image
+      if self.current_line >= self.lines:
          raise StopIteration
+
+      # If arsf_binaryreader is available read line using this
+      if HAVE_ARSF_BINARYREADER:
+         line = self.binreader_file.Readline(self.current_line)
+      # If arsf_binaryreader is not available read using NumPy
+      else:
+         line = numpy.fromstring(self.file_handler.read(self.line_size),
+                                 dtype=self.numpy_dtype)
+         if line.size < (self.bands * self.samples):
+            raise StopIteration
+
       line = line.reshape(self.bands, self.samples)
 
       return line
 
    def next(self):
-       return self.__next__()
+      return self.__next__()
 
    def get_hdr_dict(self):
       """
@@ -89,8 +119,15 @@ class BilReader(collections.Iterator):
       """
       return self.hdr_data_dict
 
+   def have_arsf_binaryreader(self):
+      """
+      Check if arsf_binaryreader is available
+      """
+      return HAVE_ARSF_BINARYREADER
+
    def __del__(self):
-      self.file_handler.close()
+      if self.file_handler is not None:
+         self.file_handler.close()
 
 class BsqReader(collections.Iterator):
    """
