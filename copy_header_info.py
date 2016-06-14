@@ -10,7 +10,6 @@ Example usage:
 Author: Dan Clewley
 Creation Date: 27/08/2015
 
-read_hdr_file written by Ben Taylor
 """
 
 ###########################################################
@@ -21,98 +20,24 @@ read_hdr_file written by Ben Taylor
 
 from __future__ import print_function
 import argparse
-import collections
-import csv
 import os
-import re
 import shutil
 import sys
 
-
-def read_hdr_file(hdrfilename):
-   """
-   Read information from ENVI header file to a dictionary.
-
-   Modified to read arrays as a long string - so they are easier to write out again.
-   """
-   output = collections.OrderedDict()
-   inblock = False
-
-   if os.path.splitext(hdrfilename)[-1].lower() != '.hdr':
-      raise TypeError("Must provide header file as input (ending with '.hdr') {} was provided".format(hdrfilename))
-
-   try:
-      hdrfile = open(hdrfilename, "r")
-   except:
-      raise IOError("Could not open hdr file " + str(hdrfilename) + ". Reason: " + str(sys.exc_info()[1]), sys.exc_info()[2])
-
-   # Read line, split it on equals, strip whitespace from resulting strings and add key/value pair to output
-   currentline = hdrfile.readline()
-   while (currentline != ""):
-      # ENVI headers accept blocks bracketed by curly braces - check for these
-      if (not inblock):
-         # Split line on first equals sign
-         if (re.search("=", currentline) != None):
-            linesplit = re.split("=", currentline, 1)
-            key = linesplit[0].strip()
-            value = linesplit[1].strip()
-
-            # If value starts with an open brace, it's the start of a block - strip the brace off and read the rest of the block
-            if (re.match("{", value) != None):
-               inblock = True
-
-               # If value ends with a close brace it's the end of the block as well - strip the brace off
-               if (re.search("}$", value)):
-                  inblock = False
-            output[key] = value
-      else:
-         # If we're in a block, just read the line, strip whitespace (and any closing brace ending the block) and add the whole thing
-         value = currentline.strip()
-         if (re.search("}$", value)):
-            inblock = False
-            value = value.strip()
-         if value.find('{') > -1:
-            value = value.replace('{','')
-            # Replace bracked followed by space
-            value = value.replace('( ','(')
-            value = value.strip()
-         # end if
-         output[key] = output[key] + value
-
-      currentline = hdrfile.readline()
-
-   hdrfile.close()
-
-   return output
+from arsf_envi_reader import envi_header
 
 def copy_header_dict_items(source_header_dict, target_header_dict, keys):
    """
    Copy selected keys from source header to target. Replacing if they exist
    """
    for key in keys:
+      # Change to lower case
+      key = key.lower()
       try:
          target_header_dict[key] = source_header_dict[key]
          print("Copied {}".format(key))
       except KeyError:
          print("Could not find {}. Skipping".format(key),file=sys.stderr)
-
-def write_envi_header(filename, header_dict):
-   """
-   Writes a dictionary to an ENVI header file
-   """
-
-   # Open header file for writing
-   try:
-      hdrfile = open(filename, "w")
-   except:
-      raise IOError("Could not open hdr file " + str(hdrfilename) + ". Reason: " + str(sys.exc_info()[1]), sys.exc_info()[2])
-
-   hdrfile.write("ENVI\n")
-   for key in header_dict.keys():
-      # Write key at start of line
-      hdrfile.write("{} = {}\n".format(key, header_dict[key]))
-
-   hdrfile.close()
 
 def run_copy_header(sourceheader, targetheader, keys):
    """
@@ -121,25 +46,29 @@ def run_copy_header(sourceheader, targetheader, keys):
 
    """
    # Read header info to dictionaries
-   source_header_dict = read_hdr_file(args.sourceheader[0])
-   target_header_dict = read_hdr_file(args.targetheader[0])
+   source_header_dict = envi_header.read_hdr_file(args.sourceheader[0])
+   target_header_dict = envi_header.read_hdr_file(args.targetheader[0])
 
    copy_header_dict_items(source_header_dict, target_header_dict, args.keys)
 
    # Make a backup copy of the origional header
    try:
       if os.path.isfile(args.targetheader[0] + '.bak'):
-         print("Backup file {}.bak already exists. Please remove and retry".format(args.targetheader[0]), file=sys.stderr)
+         print("Backup file {}.bak already exists. Please remove "
+               "and retry".format(args.targetheader[0]), file=sys.stderr)
          sys.exit(1)
       shutil.copy2(args.targetheader[0],args.targetheader[0] + '.bak')
    except IOError:
-      print("Could create backup copy of header in same destination as source - possibly due to permissions. Aborting",file=sys.stderr)
+      print("Could create backup copy of header in same destination as source "
+            "- possibly due to folder permissions. Aborting",file=sys.stderr)
    except Exception:
       raise
 
-   write_envi_header(args.targetheader[0], target_header_dict)
+   envi_header.write_envi_header(args.targetheader[0], target_header_dict)
 
-   print("Copied items to {0}, origional header saved as {0}.bak".format(args.targetheader[0]))
+   print("Copied items to {0}, origional header "
+         "saved as {0}.bak".format(args.targetheader[0]))
+
 if __name__ == "__main__":
 
    parser = argparse.ArgumentParser(description='''

@@ -36,7 +36,7 @@ ENVI_TO_NUMPY_DTYPE = {'1':  numpy.uint8,
 
 def find_hdr_file(rawfilename):
    """
-   Find ENVI header file associated with raw file
+   Find ENVI header file associated with data file
    """
    if not os.path.isfile(rawfilename):
       raise IOError("Could not find file " + rawfilename)
@@ -62,6 +62,7 @@ def read_hdr_file(hdrfilename):
    Read information from ENVI header file to a dictionary.
    """
    output = collections.OrderedDict()
+   comments = ""
    inblock = False
 
    try:
@@ -72,8 +73,7 @@ def read_hdr_file(hdrfilename):
 
    # Read line, split it on equals, strip whitespace from resulting strings
    # and add key/value pair to output
-   currentline = hdrfile.readline()
-   while currentline != "":
+   for currentline in hdrfile:
       # ENVI headers accept blocks bracketed by curly braces - check for these
       if not inblock:
          # Split line on first equals sign
@@ -96,6 +96,9 @@ def read_hdr_file(hdrfilename):
                   value = re.sub("}$", "", value, 1)
             value = value.strip()
             output[key] = value
+         # Check for a comment
+         elif re.search("^;", currentline) is not None:
+            comments += currentline
       else:
          # If we're in a block, just read the line, strip whitespace
          # (and any closing brace ending the block) and add the whole thing
@@ -106,9 +109,9 @@ def read_hdr_file(hdrfilename):
             value = value.strip()
          output[key] = output[key] + value
 
-      currentline = hdrfile.readline()
-
    hdrfile.close()
+
+   output['_comments'] = comments
 
    return output
 
@@ -125,13 +128,17 @@ def write_envi_header(filename, header_dict):
 
    hdrfile.write("ENVI\n")
    for key in header_dict.keys():
-      # If it contains commas likely a list so put in curly braces
-      if str(header_dict[key]).count(',') > 0:
-         hdrfile.write("{} = {{{}}}\n".format(key, header_dict[key]))
-      else:
-         # Write key at start of line
-         hdrfile.write("{} = {}\n".format(key, header_dict[key]))
+      # Check not comments key (will write separately)
+      if key != "_comments":
+         # If it contains commas likely a list so put in curly braces
+         if str(header_dict[key]).count(',') > 0:
+            hdrfile.write("{} = {{{}}}\n".format(key, header_dict[key]))
+         else:
+            # Write key at start of line
+            hdrfile.write("{} = {}\n".format(key, header_dict[key]))
 
+   # Write out comments at the end
+   hdrfile.write(header_dict['_comments'])
    hdrfile.close()
 
 
