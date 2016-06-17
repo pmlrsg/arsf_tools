@@ -65,12 +65,9 @@ class BilReader(collections.Iterator):
 
    """
    def __init__(self, input_file):
-      if HAVE_ARSF_BINARYREADER:
-         self.binreader_file = binfile.BinFile(input_file)
-         self.file_handler = None
-      else:
-         self.file_handler = open(input_file, "rb")
-         self.binreader_file = None
+
+      self.binreader_file = None
+      self.file_handler = None
 
       header_file = envi_header.find_hdr_file(input_file)
       hdr_data_dict = envi_header.read_hdr_file(header_file)
@@ -83,11 +80,18 @@ class BilReader(collections.Iterator):
       self.samples = int(hdr_data_dict["samples"])
       self.lines = int(hdr_data_dict["lines"])
       self.bands = int(hdr_data_dict["bands"])
-      self.numpy_dtype = envi_header.ENVI_TO_NUMPY_DTYPE[hdr_data_dict["data type"]]
+      self.numpy_dtype = \
+                   envi_header.ENVI_TO_NUMPY_DTYPE[hdr_data_dict["data type"]]
       self.byte_size = numpy.dtype(self.numpy_dtype).itemsize
       self.line_size = self.samples * self.bands * self.byte_size
       self.hdr_data_dict = hdr_data_dict
       self.current_line = -1
+
+      if HAVE_ARSF_BINARYREADER:
+         self.binreader_file = binfile.BinFile(input_file)
+      else:
+         self.file_handler = open(input_file, "rb")
+
 
    def __next__(self):
       self.current_line +=1
