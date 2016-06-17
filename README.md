@@ -1,11 +1,11 @@
-ARSF Tools
-===========
+NERC-ARF Tools
+================
 
 Various tools for using, processing or handling airborne remote sensing data acquired
 by the National Environment Research Council ([NERC](http://www.nerc.ac.uk/))
-Airborne Research Facility (NERC-ARF; formerly ARSF).
+Airborne Research Facility ([NERC-ARF](https://bas.ac.uk/nerc-arf ); formerly ARSF).
 
-Developed by the NERC-ARF Data Analysis Node ([NERC-ARF-DAN](http://nerc-arf-dan.nerc.ac.uk/)) based at Plymouth Marine Laboratory.
+Developed by the NERC-ARF Data Analysis Node ([NERC-ARF-DAN](http://nerc-arf-dan.pml.ac.uk/)) based at Plymouth Marine Laboratory.
 
 Most tools are written in Python and depend on other libraries such as NumPy, see
 individual scripts for more details on required libraries.
@@ -27,6 +27,9 @@ To install these under Windows it is recommended to use the following steps:
 ```
 conda install -c conda-forge numpy gdal
 ```
+
+Alternativly they can be installed through [OSGeo4W](https://trac.osgeo.org/osgeo4w/).
+This is recomended if you also plan to install the [arsf_dem_scripts](https://github.com/pmlrsg/arsf_dem_scripts).
 
 LiDAR
 ------
