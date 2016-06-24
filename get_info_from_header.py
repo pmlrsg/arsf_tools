@@ -18,60 +18,10 @@ read_hdr_file written by Ben Taylor
 
 from __future__ import print_function
 import argparse
-import collections
 import csv
 import os
-import re
 import sys
-
-def read_hdr_file(hdrfilename):
-   """
-   Read information from ENVI header file to a dictionary.
-   """
-   output = collections.OrderedDict()
-   inblock = False
-
-   try:
-      hdrfile = open(hdrfilename, "r")
-   except:
-      raise IOError("Could not open hdr file " + str(hdrfilename) + ". Reason: " + str(sys.exc_info()[1]), sys.exc_info()[2])
-
-   # Read line, split it on equals, strip whitespace from resulting strings and add key/value pair to output
-   currentline = hdrfile.readline()
-   while (currentline != ""):
-      # ENVI headers accept blocks bracketed by curly braces - check for these
-      if (not inblock):
-         # Split line on first equals sign
-         if (re.search("=", currentline) != None):
-            linesplit = re.split("=", currentline, 1)
-            key = linesplit[0].strip()
-            value = linesplit[1].strip()
-
-            # If value starts with an open brace, it's the start of a block - strip the brace off and read the rest of the block
-            if (re.match("{", value) != None):
-               inblock = True
-               value = re.sub("^{", "", value, 1)
-
-               # If value ends with a close brace it's the end of the block as well - strip the brace off
-               if (re.search("}$", value)):
-                  inblock = False
-                  value = re.sub("}$", "", value, 1)
-            value = value.strip()
-            output[key] = value
-      else:
-         # If we're in a block, just read the line, strip whitespace (and any closing brace ending the block) and add the whole thing
-         value = currentline.strip()
-         if (re.search("}$", value)):
-            inblock = False
-            value = re.sub("}$", "", value, 1)
-            value = value.strip()
-         output[key] = output[key] + value
-
-      currentline = hdrfile.readline()
-
-   hdrfile.close()
-
-   return output
+from arsf_envi_reader import envi_header
 
 if __name__ == "__main__":
 
@@ -95,7 +45,7 @@ if __name__ == "__main__":
       print('Could not open input header ({})'.format(args.inputfile[0]), file=sys.stderr)
       sys.exit(1)
 
-   header_dict = read_hdr_file(args.inputfile[0])
+   header_dict = envi_header.read_hdr_file(args.inputfile[0])
 
    band_info_dict = {}
    nbands =  int(header_dict['bands'])
