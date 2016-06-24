@@ -18,6 +18,7 @@ http://stackoverflow.com/questions/4019971/how-to-implement-iter-self-for-a-cont
 # licence is available to download with this file.
 ###########################################################
 
+import abc
 import collections
 import numpy
 from . import envi_header
@@ -30,8 +31,79 @@ try:
 except ImportError:
    pass
 
+class _BinaryReader(collections.Iterator):
+   """
+   Abstract class for reading binary files with different interleaves.
+   """
+   def __init__(self, input_file):
 
-class BilReader(collections.Iterator):
+      self.binreader_file = None
+      self.file_handler = None
+
+      header_file = envi_header.find_hdr_file(input_file)
+      hdr_data_dict = envi_header.read_hdr_file(header_file)
+
+      self.samples = int(hdr_data_dict["samples"])
+      self.lines = int(hdr_data_dict["lines"])
+      self.bands = int(hdr_data_dict["bands"])
+      self.numpy_dtype = \
+                   envi_header.ENVI_TO_NUMPY_DTYPE[hdr_data_dict["data type"]]
+      self.byte_size = numpy.dtype(self.numpy_dtype).itemsize
+      self.line_size = self.samples * self.bands * self.byte_size
+      self.band_size = self.samples * self.lines * self.byte_size
+      self.hdr_data_dict = hdr_data_dict
+      self.current_line = -1
+      self.current_band = -1
+      self.interleave_checked = False
+
+      if HAVE_ARSF_BINARYREADER:
+         self.binreader_file = binfile.BinFile(input_file)
+      else:
+         self.file_handler = open(input_file, "rb")
+
+   @abc.abstractmethod
+   def __next__(self): pass
+
+   def next(self):
+      return self.__next__()
+
+   def get_hdr_dict(self):
+      """
+      Return a dictionary of parameters from header
+      """
+      return self.hdr_data_dict
+
+   def have_arsf_binaryreader(self):
+      """
+      Check if arsf_binaryreader is available
+      """
+      return HAVE_ARSF_BINARYREADER
+
+   def check_interleave(self, interleave):
+      """
+      Check if the interleave of the file is that expected
+      by the reader.
+
+      Only performs check if interleave_checked is False if not assume already
+      checked and return True.
+
+      Stops doing string comparison for each line.
+      """
+      if not self.interleave_checked:
+         if self.hdr_data_dict["interleave"].lower() == interleave:
+            self.interleave_checked = True
+         else:
+            self.interleave_checked = False
+
+      return self.interleave_checked
+
+   def __del__(self):
+      if self.file_handler is not None:
+         self.file_handler.close()
+
+
+
+class BilReader(_BinaryReader):
    """
    Class to read ENVI BIL file line at a time
 
@@ -64,36 +136,13 @@ class BilReader(collections.Iterator):
       in_data = None
 
    """
-   def __init__(self, input_file):
 
-      self.binreader_file = None
-      self.file_handler = None
-
-      header_file = envi_header.find_hdr_file(input_file)
-      hdr_data_dict = envi_header.read_hdr_file(header_file)
-
+   def __next__(self):
       # Check we have a BIL file
-      if hdr_data_dict["interleave"].lower() != "bil":
+      if not self.check_interleave("bil"):
          raise Exception("The class 'BilReader' is only "
                          "valid for BIL format files")
 
-      self.samples = int(hdr_data_dict["samples"])
-      self.lines = int(hdr_data_dict["lines"])
-      self.bands = int(hdr_data_dict["bands"])
-      self.numpy_dtype = \
-                   envi_header.ENVI_TO_NUMPY_DTYPE[hdr_data_dict["data type"]]
-      self.byte_size = numpy.dtype(self.numpy_dtype).itemsize
-      self.line_size = self.samples * self.bands * self.byte_size
-      self.hdr_data_dict = hdr_data_dict
-      self.current_line = -1
-
-      if HAVE_ARSF_BINARYREADER:
-         self.binreader_file = binfile.BinFile(input_file)
-      else:
-         self.file_handler = open(input_file, "rb")
-
-
-   def __next__(self):
       self.current_line +=1
 
       # Check if the line is within image
@@ -114,26 +163,7 @@ class BilReader(collections.Iterator):
 
       return line
 
-   def next(self):
-      return self.__next__()
-
-   def get_hdr_dict(self):
-      """
-      Return a dictionary of parameters from header
-      """
-      return self.hdr_data_dict
-
-   def have_arsf_binaryreader(self):
-      """
-      Check if arsf_binaryreader is available
-      """
-      return HAVE_ARSF_BINARYREADER
-
-   def __del__(self):
-      if self.file_handler is not None:
-         self.file_handler.close()
-
-class BsqReader(collections.Iterator):
+class BsqReader(_BinaryReader):
    """
    Class to read ENVI BSQ file band at a time
 
@@ -163,44 +193,31 @@ class BsqReader(collections.Iterator):
       in_data = None
 
    """
-   def __init__(self, input_file):
-      self.file_handler = open(input_file, "rb")
 
-      header_file = envi_header.find_hdr_file(input_file)
-      hdr_data_dict = envi_header.read_hdr_file(header_file)
-
-      # Check we have a BIL file
-      if hdr_data_dict["interleave"].lower() != "bsq":
+   def __next__(self):
+      # Check we have a BSQ file
+      if not self.check_interleave("bsq"):
          raise Exception("The class 'BsqReader' is only "
                          "valid for BSQ format files")
 
-      self.samples = int(hdr_data_dict["samples"])
-      self.lines = int(hdr_data_dict["lines"])
-      self.bands = int(hdr_data_dict["bands"])
-      self.numpy_dtype = envi_header.ENVI_TO_NUMPY_DTYPE[hdr_data_dict["data type"]]
-      self.byte_size = numpy.dtype(self.numpy_dtype).itemsize
-      self.band_size = self.samples * self.lines * self.byte_size
-      self.hdr_data_dict = hdr_data_dict
+      self.current_band +=1
 
-   def __next__(self):
-      band = numpy.fromstring(self.file_handler.read(self.band_size),
-                              dtype=self.numpy_dtype)
-      if band.size < (self.samples * self.lines):
+      # Check if the line is within image
+      if self.current_band >= self.bands:
          raise StopIteration
-      band = band.reshape(self.samples, self.lines)
 
-      return band
+      # If arsf_binaryreader is available read line using this
+      if HAVE_ARSF_BINARYREADER:
+         line = self.binreader_file.Readband(self.current_band)[1]
+      # If arsf_binaryreader is not available read using NumPy
+      else:
+         line = numpy.fromstring(self.file_handler.read(self.band_size),
+                                 dtype=self.numpy_dtype)
+         if line.size < (self.samples * self.lines):
+            raise StopIteration
 
-   def next(self):
-       return self.__next__()
+      line = line.reshape(self.samples, self.lines)
 
-   def get_hdr_dict(self):
-      """
-      Return a dictionary of parameters from header
-      """
-      return self.hdr_data_dict
-
-   def __del__(self):
-      self.file_handler.close()
+      return line
 
 
