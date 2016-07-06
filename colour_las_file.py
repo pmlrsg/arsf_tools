@@ -38,6 +38,9 @@ import laspy
 import numpy
 from osgeo import gdal
 
+#: Debug mode - prints out more information useful for debugging.
+DEBUG = False
+
 class ExtractPixels(object):
    """
    Class to extract RGB values for a given pixel
@@ -114,8 +117,9 @@ class ExtractPixels(object):
                 + (self.pixel_y_size / 2.0)
 
       if pixel_x < 0 or pixel_y < 0:
-         print("Position {} N, {} E is outside image, setting to black".format(in_y, in_x))
-         pixel_vals = [0,0,0]
+         pixel_vals = None
+         if DEBUG:
+            print("Position {} N, {} E is outside image.".format(in_y, in_x))
       else:
          try:
             red_val = self.red_band[int(pixel_y), int(pixel_x)]
@@ -124,8 +128,10 @@ class ExtractPixels(object):
 
             pixel_vals = [red_val, green_val, blue_val]
          except IndexError:
-            print("Position {} N, {} E is outside image, setting to black".format(in_y, in_x))
-            pixel_vals = [0,0,0]
+            pixel_vals = None
+            if DEBUG:
+               print("Position {} N, {} E is outside image.".format(in_y,
+                                                                    in_x))
       return pixel_vals
 
 if __name__ == "__main__":
@@ -192,13 +198,16 @@ Created by ARSF-DAN at Plymouth Marine Laboratory.""")
    status_percent = 0
    status_inc = point_x.shape[0] / 10
 
+   colour_pixels = 0
 
    for i in range(point_x.shape[0]):
       pixel_vals = pixelval.get_pixelvals(point_x[i], point_y[i])
 
-      out_red[i] = pixel_vals[0]
-      out_green[i] = pixel_vals[1]
-      out_blue[i] = pixel_vals[2]
+      if pixel_vals is not None:
+         out_red[i] = pixel_vals[0]
+         out_green[i] = pixel_vals[1]
+         out_blue[i] = pixel_vals[2]
+         colour_pixels += 1
 
       if i >= status and status_percent < 100:
          print("{}...".format(status_percent), end="")
@@ -208,7 +217,9 @@ Created by ARSF-DAN at Plymouth Marine Laboratory.""")
 
    print("100 %")
 
-   pixel_vals = None
+   print("Set colour for {}/{} points".format(colour_pixels, point_x.shape[0]))
+
+   pixelval = None
 
    output_file.set_red(out_red)
    output_file.set_green(out_green)
