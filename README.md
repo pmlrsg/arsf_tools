@@ -63,7 +63,7 @@ For a description of the .all format used see:
 
 https://arsf-dan.nerc.ac.uk/trac/wiki/Processing/LIDARDEMs
 
-For Conversion to LAS Requires LAStools > 160730 to use the '-utm ZZnorth'
+For conversion to LAS Requires LAStools > 160730 to use the '-utm ZZnorth'
 flag.
 
 Usage:
