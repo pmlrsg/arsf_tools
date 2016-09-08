@@ -28,8 +28,8 @@ To install these under Windows it is recommended to use the following steps:
 conda install -c conda-forge numpy gdal
 ```
 
-Alternativly they can be installed through [OSGeo4W](https://trac.osgeo.org/osgeo4w/).
-This is recomended if you also plan to install the [arsf_dem_scripts](https://github.com/pmlrsg/arsf_dem_scripts).
+Alternatively they can be installed through [OSGeo4W](https://trac.osgeo.org/osgeo4w/).
+This is recommended if you also plan to install the [arsf_dem_scripts](https://github.com/pmlrsg/arsf_dem_scripts).
 
 LiDAR
 ------
@@ -52,6 +52,24 @@ See separate [README](las13/README) for more details.
 
 A script to attribute LAS files with colours from an image (e.g., hyperspectral data).
 Requires GDAL python bindings and [laspy](https://github.com/grantbrown/laspy).
+
+**convert_pre2009_lidar.py**
+
+A script to convert ASCII LiDAR files used for ARSF data prior to 2009
+(.all format) with two returns for each line into into ASCII format with a return
+on each line or LAS.
+
+For a description of the .all format used see:
+
+https://arsf-dan.nerc.ac.uk/trac/wiki/Processing/LIDARDEMs
+
+For conversion to LAS Requires LAStools > 160730 to use the '-utm ZZnorth'
+flag.
+
+Usage:
+```
+convert_pre2009_lidar.py -i lidar.all -o lidar_las.las
+```
 
 **ARSF DEM Scripts**
 
@@ -83,6 +101,21 @@ A script to batch map level 1b files to level 3b using APL.
 **Airborne Processing Library (APL)**
 
 Library for processing hyperspectral data. Available from https://github.com/arsf/apl
+
+Camera
+-------
+
+**extract_wild_rc10_gps.py**
+
+Extract GPS coordinates from ARSF Wild RC-10 TIFF images available from
+[NEODC](http://neodc.nerc.ac.uk/) using exiftool and save to CSV.
+
+Requires exiftool to be installed from http://www.sno.phy.queensu.ca/~phil/exiftool/
+
+Usage:
+```
+extract_wild_rc10_gps.py -o photo_locations.csv *.tif
+```
 
 Other
 ------
