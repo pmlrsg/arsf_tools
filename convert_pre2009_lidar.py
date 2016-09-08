@@ -94,6 +94,9 @@ def convert_pre2009_all_to_ascii(input_all_file, output_ascii_file):
          height_first_return = elements[7]
          intensity_first_return = elements[8]
 
+         # Some pulses have two returns which are the same or very similar
+         # so don't consider as separate. Require a minimum height difference
+         # between returns within a pulse to consider them separate.
          height_diff = abs(float(height_first_return)
                            - float( height_last_return))
          if height_diff > MIN_HEIGHT_DIFF:
