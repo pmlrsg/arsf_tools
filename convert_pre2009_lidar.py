@@ -128,8 +128,8 @@ def convert_ascii_to_las(input_ascii, output_las, utm_zone):
    subprocess.check_call(las2txt_cmd)
 
 if __name__ == "__main__":
-   parser = argparse.ArgumentParser(
-   description="Convert .all format LiDAR data to LAS or ASCII",)
+   parser = argparse.ArgumentParser(description="Convert .all format LiDAR "
+                                                "data to LAS or ASCII")
    parser.add_argument("-i", "--inall", type=str,
                        help="Input directory containing .all files",
                        required=True)
