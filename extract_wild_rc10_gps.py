@@ -102,7 +102,7 @@ def convert_date(rcd_date):
    month = month_dict[rcd_date.split("-")[1]]
    year = "20" + rcd_date.split("-")[2]
 
-   return day, month, year
+   return int(day), int(month), int(year)
 
 if __name__ == "__main__":
    parser = argparse.ArgumentParser(description="Extract location from exif "
@@ -152,7 +152,7 @@ if __name__ == "__main__":
          if nav_data:
             gps_time = exif_info["gps time"].split(":")
             #if date not provided, get from sbet file
-            if not args.year and not args.month and args.day:
+            if not args.year and not args.month and not args.day:
                day, month, year = convert_date(exif_info["date"])
             else:
                year = args.year
