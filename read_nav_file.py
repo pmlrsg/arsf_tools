@@ -11,6 +11,7 @@
 #This is provided as is and there is no warranty or guarantee it works
 #The python numpy library is required to run
 
+from __future__ import print_function
 import argparse
 import numpy
 import sys
@@ -89,6 +90,37 @@ def sol_record_types():
             ("geoid_model", numpy.uint8),
             ("padding", numpy.int8),
             ("crc32", numpy.int32) ]
+
+###########################################################################
+# Get a list of the SBET record types
+# This is the definition of a SBET record
+###########################################################################
+def sbet_record_types():
+   """Function sbet_record_types
+
+      Get a list of the sbet record types
+
+      Arguments:
+
+      Returns: list of the data types in a sbet record
+   """
+   return [ ("time", numpy.float64),
+            ("lat", numpy.float64),
+            ("lon", numpy.float64),
+            ("alt", numpy.float64),
+            ("ewspeed", numpy.float64),
+            ("nsspeed", numpy.float64),
+            ("vertspeed", numpy.float64),
+            ("roll", numpy.float64),
+            ("pitch", numpy.float64),
+            ("heading", numpy.float64),
+            ("wander", numpy.float64),
+            ("ewacc", numpy.float64),
+            ("nsacc", numpy.float64),
+            ("vertacc", numpy.float64),
+            ("xacc", numpy.float64),
+            ("yacc", numpy.float64),
+            ("zacc", numpy.float64) ]
 
 ###########################################################################
 # Get a numpy data type for a sol record
@@ -171,6 +203,26 @@ def readSol(filename):
    return sol_data
 
 ###########################################################################
+# Read a sbet file into a numpy array.
+# This is the function that reads the SBET file and returns the data as a
+# numpy array
+###########################################################################
+def readSbet(filename):
+   """Function readSbet
+
+      Read an sbet file into a numpy array.
+
+      Arguments:
+               filename: string of filename to read into a numpy array
+
+      Returns: 2-d numpy array of sbet data
+   """
+   if not isinstance(filename, str):
+      raise TypeError("argument 1 to readSbet must be a string")
+   #end if
+   return numpy.fromfile(filename, dtype=numpy.dtype(sbet_record_types()))
+
+###########################################################################
 # Function to get the navData array index with a closest value to 'value'
 # in the column described by 'index'. e.g. index='time'
 ###########################################################################
@@ -190,8 +242,8 @@ def getArrayIndex(navData,index,value):
 if __name__=='__main__':
    #Get the input arguments
    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-   parser.add_argument('--input','-i',help ='Input SOL file to read',default="",metavar="<solfile>")
-   parser.add_argument('--output','-o',help ='Output TXT file to write',default="",metavar="<txtfile>")
+   parser.add_argument('--input','-i',help ='Input navigation (sol/sbet) file to read',default="",metavar="<file>",required=True)
+   parser.add_argument('--output','-o',help ='Output TXT file to write',default=None,metavar="<txtfile>")
    parser.add_argument('--parse','-p',default=["time","lat","lon","alt","roll","pitch","heading"],help ='Elements of sol file to write out. This is \
                                 a space separated list of keywords in the sol_header_types and sol_record_types within this script. To get a \
                                 list of the possible keywords use the keyword list, i.e. "--parse list"',nargs='+',metavar="keyword")   
@@ -202,34 +254,46 @@ if __name__=='__main__':
    commandline=parser.parse_args()
 
    if 'list' in commandline.parse:
-      print "Found 'list' in parse string - will write out keywords and exit..."
+      print("Found 'list' in parse string - will write out keywords and exit...")
       for item in sol_record_types():
-         print item[0]
+         print(item[0])
       for item in sol_header_types():
-         print item[0]
+         print(item[0])
       sys.exit(0)
 
-   #check the sol file exists - exit if not
+   if commandline.output is None and commandline.closest is None:
+      print("You must specify an output file to write the text to.")
+      sys.exit(1)
+
+   #check the navigation file exists - exit if not
    if not os.path.exists(commandline.input):
-      print "%s the input file cannot be found - are you sure it exists?"%commandline.input
+      print("%s the input file cannot be found - are you sure it exists?"%commandline.input)
       sys.exit(1)
 
    #Check limits are sane - exit if not
    if commandline.limits[1] <= commandline.limits[0]:
-      print "Upper limit should be higher than lower limit."
+      print("Upper limit should be higher than lower limit.")
       sys.exit(1)
-   
+
    #read in the sol file - an arry with each row as a record
-   soldata=readSol(commandline.input)
+   try:
+      print("Trying to read as SOL file ...")
+      navdata=readSol(commandline.input)
+   except:
+      try:
+         print("Failed.\nTrying to read as SBET file ...")
+         navdata=readSbet(commandline.input)
+      except Exception as e:
+         raise(e)
 
    #if closest has been specified only run these and then exit
    if commandline.closest is not None:
       for ctime in commandline.closest:      
-         print "Record closest to given time of %f is:\n"%ctime,soldata[getArrayIndex(soldata,'time',ctime)],'\n'
+         print("Record closest to given time of %f is:\n"%ctime,navdata[getArrayIndex(navdata,'time',ctime)],'\n')
       sys.exit(0)
 
    #Now trim the data down depending on the given time limits
-   trimmed_data=soldata[numpy.where(soldata['time'] > commandline.limits[0])]
+   trimmed_data=navdata[numpy.where(navdata['time'] > commandline.limits[0])]
    trimmed_data=trimmed_data[numpy.where(trimmed_data['time'] < commandline.limits[1])]
 
    #Get the parse strings from the command line
@@ -241,8 +305,8 @@ if __name__=='__main__':
    #write out the data to a text file
    try:
       outfile=open(commandline.output,'w')
-   except Exception,e:
-      print >> sys.stderr, "Error opening the output file: %s"%str(e)
+   except Exception as e:
+      print("Error opening the output file: %s"%str(e), file=sys.stderr)
       sys.exit(1)
 
    #Write out the element names to be written - eg the csv column names
