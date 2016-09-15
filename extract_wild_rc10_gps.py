@@ -33,7 +33,9 @@ import time
 try:
    import read_nav_file
 except ImportError:
-   print("Could not import read_nav_file. Please download from arsf_tools")
+   print("Could not import read_nav_file. Please download from arsf_tools",
+         file=sys.stderr)
+   sys.exit(1)
 
 def get_exif_info_from_image(image_file):
    """
