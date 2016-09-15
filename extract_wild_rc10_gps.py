@@ -8,10 +8,11 @@ Requires exiftool to be installed from http://www.sno.phy.queensu.ca/~phil/exift
 
 Known Issues:
 
-For some projects in 2007 the latitude wasn't saved and the tool won't work.
-
 Author: Dan Clewley, NERC-ARF-DAN
 Creation Date: 06/09/2016
+
+Change history
+14/09/2016: (Laura Harris) Added functionality to read lat and long from sbet file.
 
 """
 ##################################################################
@@ -27,6 +28,14 @@ import glob
 import os
 import subprocess
 import sys
+import math
+import time
+try:
+   import read_nav_file
+except ImportError:
+   print("Could not import read_nav_file. Please download from arsf_tools",
+         file=sys.stderr)
+   sys.exit(1)
 
 def get_exif_info_from_image(image_file):
    """
@@ -79,11 +88,18 @@ if __name__ == "__main__":
    parser.add_argument("-o", "--out_csv",
                        type=str, required=True,
                        help="Output CSV")
+   parser.add_argument("-n", "--nav",
+                       type=str, default = None,
+                       help="sbet nav file to get lat/long if not tagged in image")
    args=parser.parse_args()
 
    # On Windows don't have shell expansion so fake it using glob
    if args.inputimages[0].find('*') > -1:
       args.inputimages = glob.glob(args.inputimages[0])
+
+   # if nav file provided, read in
+   if args.nav is not None:
+      nav_data = read_nav_file.readSbet(args.nav)
 
    f = open(args.out_csv, "w")
 
@@ -98,14 +114,45 @@ if __name__ == "__main__":
       try:
          exif_info = get_exif_info_from_image(image)
 
+         # If nav data need to convert GPS time to sbet format (week seconds)
+         if args.nav is not None:
+            gps_time = exif_info["gps time"].split(":")
+            weekseconds = (time.strptime(exif_info["date"], 
+                          '%d-%b-%y').tm_wday+1) * 24 * 60 * 60
+            gps_seconds = (weekseconds + 60**2 * float(gps_time[0]) 
+                          + 60 * float(gps_time[1]) + float(gps_time[2]))
+            index=read_nav_file.getArrayIndex(nav_data,'time',gps_seconds)
+
+         #check latitude is present in image
+         if "local latitude" not in exif_info and args.nav is not None:
+            # get from sbet file if provided
+            latitude = math.degrees(nav_data['lat'][index])
+         else:
+            latitude = parse_gps_pos_str(exif_info["local latitude"])
+
+         #check longitude is present in image
+         if "local longitude" not in exif_info and args.nav is not None:
+            # get from sbet file if provided
+            longitude = math.degrees(math.degrees(nav_data['lat'][index]))
+         else:
+            longitude = parse_gps_pos_str(exif_info["local longitude"])
+
+         # gps height may be labelled differently
+         if "gps height ft" in exif_info:
+            gps_height = exif_info["gps height ft"]
+         else:
+            gps_height = exif_info["gps height"]
+
+
          out_row = [os.path.basename(image),
                     exif_info["date"],
                     exif_info["gps time"].replace(" ",""),
-                    parse_gps_pos_str(exif_info["local latitude"]),
-                    parse_gps_pos_str(exif_info["local longitude"]),
-                    exif_info["gps height"]]
+                    latitude,
+                    longitude,
+                    gps_height]
 
          out_csv_writer.writerow(out_row)
+
       except Exception as err:
          print(" Failed to get tags from {}\n{}".format(image, err),
                file=sys.stderr)
