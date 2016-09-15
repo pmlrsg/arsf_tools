@@ -87,7 +87,7 @@ if __name__ == "__main__":
                        type=str, required=True,
                        help="Output CSV")
    parser.add_argument("-n", "--nav",
-                       type=str, required=False,
+                       type=str, default = None,
                        help="sbet nav file to get lat/long if not tagged in image")
    args=parser.parse_args()
 
@@ -96,8 +96,7 @@ if __name__ == "__main__":
       args.inputimages = glob.glob(args.inputimages[0])
 
    # if nav file provided, read in
-   nav_data = False
-   if args.nav:
+   if args.nav is not None:
       nav_data = read_nav_file.readSbet(args.nav)
 
    f = open(args.out_csv, "w")
@@ -114,7 +113,7 @@ if __name__ == "__main__":
          exif_info = get_exif_info_from_image(image)
 
          # If nav data need to convert GPS time to sbet format (week seconds)
-         if args.nav:
+         if args.nav is not None:
             gps_time = exif_info["gps time"].split(":")
             weekseconds = (time.strptime(exif_info["date"], 
                           '%d-%b-%y').tm_wday+1) * 24 * 60 * 60
@@ -123,14 +122,14 @@ if __name__ == "__main__":
             index=read_nav_file.getArrayIndex(nav_data,'time',gps_seconds)
 
          #check latitude is present in image
-         if "local latitude" not in exif_info and args.nav:
+         if "local latitude" not in exif_info and args.nav is not None:
             # get from sbet file if provided
             latitude = math.degrees(nav_data['lat'][index])
          else:
             latitude = parse_gps_pos_str(exif_info["local latitude"])
 
          #check longitude is present in image
-         if "local longitude" not in exif_info and args.nav:
+         if "local longitude" not in exif_info and args.nav is not None:
             # get from sbet file if provided
             longitude = math.degrees(math.degrees(nav_data['lat'][index]))
          else:
