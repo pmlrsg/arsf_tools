@@ -11,6 +11,7 @@
 #This is provided as is and there is no warranty or guarantee it works
 #The python numpy library is required to run
 
+from __future__ import print_function
 import argparse
 import numpy
 import sys
@@ -253,42 +254,42 @@ if __name__=='__main__':
    commandline=parser.parse_args()
 
    if 'list' in commandline.parse:
-      print "Found 'list' in parse string - will write out keywords and exit..."
+      print("Found 'list' in parse string - will write out keywords and exit...")
       for item in sol_record_types():
-         print item[0]
+         print(item[0])
       for item in sol_header_types():
-         print item[0]
+         print(item[0])
       sys.exit(0)
 
    if commandline.output is None and commandline.closest is None:
-      print "You must specify an output file to write the text to."
+      print("You must specify an output file to write the text to.")
       sys.exit(1)
 
    #check the navigation file exists - exit if not
    if not os.path.exists(commandline.input):
-      print "%s the input file cannot be found - are you sure it exists?"%commandline.input
+      print("%s the input file cannot be found - are you sure it exists?"%commandline.input)
       sys.exit(1)
 
    #Check limits are sane - exit if not
    if commandline.limits[1] <= commandline.limits[0]:
-      print "Upper limit should be higher than lower limit."
+      print("Upper limit should be higher than lower limit.")
       sys.exit(1)
 
    #read in the sol file - an arry with each row as a record
    try:
-      print "Trying to read as SOL file ..."
+      print("Trying to read as SOL file ...")
       navdata=readSol(commandline.input)
    except:
       try:
-         print "Failed.\nTrying to read as SBET file ..."
+         print("Failed.\nTrying to read as SBET file ...")
          navdata=readSbet(commandline.input)
-      except Exception, e:
+      except Exception as e:
          raise(e)
 
    #if closest has been specified only run these and then exit
    if commandline.closest is not None:
       for ctime in commandline.closest:      
-         print "Record closest to given time of %f is:\n"%ctime,navdata[getArrayIndex(navdata,'time',ctime)],'\n'
+         print("Record closest to given time of %f is:\n"%ctime,navdata[getArrayIndex(navdata,'time',ctime)],'\n')
       sys.exit(0)
 
    #Now trim the data down depending on the given time limits
@@ -304,8 +305,8 @@ if __name__=='__main__':
    #write out the data to a text file
    try:
       outfile=open(commandline.output,'w')
-   except Exception,e:
-      print >> sys.stderr, "Error opening the output file: %s"%str(e)
+   except Exception as e:
+      print("Error opening the output file: %s"%str(e), file=sys.stderr)
       sys.exit(1)
 
    #Write out the element names to be written - eg the csv column names
