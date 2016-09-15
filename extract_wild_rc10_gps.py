@@ -32,7 +32,7 @@ import math
 import time
 try:
    import read_nav_file
-except:
+except ImportError:
    print("Could not import read_nav_file. Please download from arsf_tools")
 
 def get_exif_info_from_image(image_file):
