@@ -30,6 +30,10 @@ import subprocess
 import sys
 import math
 import time
+try:
+   import read_nav_file
+except:
+   print("Could not import read_nav_file. Please download from arsf_tools")
 
 def get_exif_info_from_image(image_file):
    """
@@ -94,7 +98,6 @@ if __name__ == "__main__":
    # if nav file provided, read in
    nav_data = False
    if args.nav:
-      import read_nav_file # don't import if not using (reduce dependancies)
       nav_data = read_nav_file.readSbet(args.nav)
 
    f = open(args.out_csv, "w")
