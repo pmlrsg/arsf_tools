@@ -29,8 +29,8 @@ import os
 import subprocess
 import sys
 import sbet_handler
-import datetime
 import math
+import time
 
 def get_exif_info_from_image(image_file):
    """
@@ -75,35 +75,6 @@ def parse_gps_pos_str(gps_pos_str):
 
    return decimal_deg
 
-def convert_date(rcd_date):
-   """
-   Converts the camera date format into regular format
-
-   Example input format:
-
-   20-Jul-07
-   """
-
-   month_dict = {
-        'Jan' : 1,
-        'Feb' : 2,
-        'Mar' : 3,
-        'Apr' : 4,
-        'May' : 5,
-        'Jun' : 6,
-        'Jul' : 7,
-        'Aug' : 8,
-        'Sep' : 9, 
-        'Oct' : 10,
-        'Nov' : 11,
-        'Dec' : 12}
-
-   day = rcd_date.split("-")[0]
-   month = month_dict[rcd_date.split("-")[1]]
-   year = "20" + rcd_date.split("-")[2]
-
-   return int(day), int(month), int(year)
-
 if __name__ == "__main__":
    parser = argparse.ArgumentParser(description="Extract location from exif "
                                                 "tags of scanned ARSF Wild RC-10"
@@ -115,15 +86,6 @@ if __name__ == "__main__":
    parser.add_argument("-n", "--nav",
                        type=str, required=False,
                        help="sbet nav file to get lat/long if not tagged in image")
-   parser.add_argument("-y", "--year",
-                       type=int, required=False,
-                       help="year of data")
-   parser.add_argument("-m", "--month",
-                       type=int, required=False,
-                       help="numeral month of data")
-   parser.add_argument("-d", "--day",
-                       type=int, required=False,
-                       help="day of data")
    args=parser.parse_args()
 
    # On Windows don't have shell expansion so fake it using glob
@@ -133,7 +95,7 @@ if __name__ == "__main__":
    # if nav file provided, read in
    nav_data = False
    if args.nav:
-      nav_data = sbet_handler.readSbet(args.nav) #function has error handling already
+      nav_data = sbet_handler.readSbet(args.nav)
 
    f = open(args.out_csv, "w")
 
@@ -151,29 +113,24 @@ if __name__ == "__main__":
          # If nav data need to convert GPS time to sbet format (week seconds)
          if nav_data:
             gps_time = exif_info["gps time"].split(":")
-            #if date not provided, get from sbet file
-            if not args.year and not args.month and not args.day:
-               day, month, year = convert_date(exif_info["date"])
-            else:
-               year = args.year
-               month = args.month
-               day = args.day
-
-            weekday = datetime.date(year, month, day).isoweekday()
-            weekseconds = weekday * 24 * 60 * 60
-            gps_seconds = weekseconds + 60**2 * float(gps_time[0]) + 60 * float(gps_time[1]) + float(gps_time[2])
+            weekseconds = (time.strptime(exif_info["date"], 
+                          '%d-%b-%y').tm_wday+1) * 24 * 60 * 60
+            gps_seconds = (weekseconds + 60**2 * float(gps_time[0]) 
+                          + 60 * float(gps_time[1]) + float(gps_time[2]))
 
          #check latitude is present in image
          if "local latitude" not in exif_info and nav_data:
             # get from sbet file if provided
-            latitude = math.degrees(sbet_handler.getPosition(gps_seconds, nav_data)[1])
+            latitude = math.degrees(sbet_handler.getPosition(
+                                                     gps_seconds, nav_data)[1])
          else:
             latitude = parse_gps_pos_str(exif_info["local latitude"])
 
          #check longitude is present in image
          if "local longitude" not in exif_info and nav_data:
             # get from sbet file if provided
-            longitude = math.degrees(sbet_handler.getPosition(gps_seconds, nav_data)[2])
+            longitude = math.degrees(sbet_handler.getPosition(
+                                                     gps_seconds, nav_data)[2])
          else:
             longitude = parse_gps_pos_str(exif_info["local longitude"])
 
