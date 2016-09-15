@@ -28,7 +28,6 @@ import glob
 import os
 import subprocess
 import sys
-import sbet_handler
 import math
 import time
 
@@ -95,7 +94,8 @@ if __name__ == "__main__":
    # if nav file provided, read in
    nav_data = False
    if args.nav:
-      nav_data = sbet_handler.readSbet(args.nav)
+      import read_sol_file # don't import if not using (reduce dependancies)
+      nav_data = read_sol_file.readSbet(args.nav)
 
    f = open(args.out_csv, "w")
 
@@ -111,26 +111,25 @@ if __name__ == "__main__":
          exif_info = get_exif_info_from_image(image)
 
          # If nav data need to convert GPS time to sbet format (week seconds)
-         if nav_data:
+         if args.nav:
             gps_time = exif_info["gps time"].split(":")
             weekseconds = (time.strptime(exif_info["date"], 
                           '%d-%b-%y').tm_wday+1) * 24 * 60 * 60
             gps_seconds = (weekseconds + 60**2 * float(gps_time[0]) 
                           + 60 * float(gps_time[1]) + float(gps_time[2]))
+            index=read_sol_file.getArrayIndex(nav_data,'time',gps_seconds)
 
          #check latitude is present in image
-         if "local latitude" not in exif_info and nav_data:
+         if "local latitude" not in exif_info and args.nav:
             # get from sbet file if provided
-            latitude = math.degrees(sbet_handler.getPosition(
-                                                     gps_seconds, nav_data)[1])
+            latitude = math.degrees(nav_data['lat'][index])
          else:
             latitude = parse_gps_pos_str(exif_info["local latitude"])
 
          #check longitude is present in image
-         if "local longitude" not in exif_info and nav_data:
+         if "local longitude" not in exif_info and args.nav:
             # get from sbet file if provided
-            longitude = math.degrees(sbet_handler.getPosition(
-                                                     gps_seconds, nav_data)[2])
+            longitude = math.degrees(math.degrees(nav_data['lat'][index]))
          else:
             longitude = parse_gps_pos_str(exif_info["local longitude"])
 
