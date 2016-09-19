@@ -120,9 +120,9 @@ extract_wild_rc10_gps.py -o photo_locations.csv *.tif
 Other
 ------
 
-**read_sol_file.py**
+**read_nav_file.py**
 
-A script / library to read SOL navigation files and write records to an ASCII text file.
+A script / library to read SOL/SBET format navigation files.
 
 **ARSF on JASMIN**
 
