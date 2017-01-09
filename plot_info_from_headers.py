@@ -32,10 +32,12 @@ import matplotlib.pyplot as plt
 import re
 
 def tryint(s):
-    try:
-        return int(s)
-    except:
-        return s
+   """ Converts a string number to an integer or returns non-numbers as strings.
+   """
+   try:
+      return int(s)
+   except ValueError:
+      return s
 
 def alphanum_key(s):
     """ Turn a string into a list of string and number chunks.
@@ -54,7 +56,8 @@ if __name__ == "__main__":
    parser.add_argument("inputfiles",  type=str, nargs='+',
                            help="Input headers")
    parser.add_argument("-o","--outdir", required=False, type=str,
-                           help="Output directory to store plots to")
+                           help="Output directory to store plots to. If not used, plots will "
+                                "still be displayed.")
    parser.add_argument("-v","--values", nargs='+', required=False, type=str,
                            help="Values to plot: fps, tint, nbands, nsamples, nlines, "
                            "binning, temp, all", default = "fps, tint")
@@ -68,6 +71,20 @@ if __name__ == "__main__":
    if len(args.inputfiles) < 2:
       print("Only one input file provided. Use get_info_from_header.py to display to screen")
       sys.exit()
+
+   # Reorder files by line number
+   if not args.keep_order:
+      args.inputfiles.sort(key=alphanum_key)
+
+   #Static dictionary filled with all the information for every plot (titles, labels filename etc)
+   labeldict={'fps' : {'xlabel':'File Index','ylabel':'Frames per second','filename':'fps.png'},
+               'tint' : {'xlabel':'File Index','ylabel':'Integration time, ms','filename':'tint.png'},
+               'nbands' : {'xlabel':'File Index','ylabel':'Number of bands','filename':'nbands.png'},
+               'nsamples' : {'xlabel':'File Index','ylabel':'Number of spatial samples','filename':'nsamples.png'},
+               'nlines' : {'xlabel':'File Index','ylabel':'Number of lines','filename':'nlines.png'},
+               'binning' : {'xlabel':'File Index','ylabel':'Spectral binning factor','filename':'binning.png'},
+               'temp' : {'xlabel':'File Index','ylabel':'Temperature of detector, ms','filename':'temp.png'}
+   }
 
    # Set up values to plot
    nbands = []
@@ -83,10 +100,6 @@ if __name__ == "__main__":
    dates = []
    start_times = []
    stop_times = []
-
-   # Reorder files by line number
-   if not args.keep_order:
-      args.inputfiles.sort(key=alphanum_key)
 
    for each_hdr in args.inputfiles:
       # Check a header file has been provided.
@@ -108,7 +121,6 @@ if __name__ == "__main__":
          start_times.append(header_dict['gps start time'].split(' ')[-1])
       if 'gps stop time' in header_dict.keys():
          stop_times.append(header_dict['gps stop time'].split(' ')[-1])
-
       if "bands" in header_dict.keys():
          nbands.append(int(header_dict['bands']))
       if "samples" in header_dict.keys():
@@ -139,78 +151,33 @@ if __name__ == "__main__":
       # won't be in dark frame files
          temp.append(float(header_dict['temperature'].split(',')[0]))
 
-   # Plot selected values
-   if "fps" in args.values or "all" in args.values:
-      plt.plot(range(1, len(fps)+1), fps)
-      plt.xlabel('File Index')
-      plt.ylabel('Frames per second')
-      if args.outdir is not None:
-         plt.savefig(os.path.join(args.outdir, 'fps.png'))
-      plt.show()
+   #Dynamic dictionary created from the keys in the header_dict
+   dicttoplot={'fps': {'fps' : fps} ,
+               'tint': {'tint' : tint, 'tint1' : tint1, 'tint2' : tint2},
+               'nbands' : {'bands' : nbands},
+               'nsamples' : {'samples' : nsamples},
+               'nlines' : {'lines' : nlines},
+               'binning' : {'binning' : binning, 'binning2' : binning2},
+               'temp' : {'temperature' : temp}
+            }
 
-   if "tint" in args.values or "all" in args.values:
-      if "tint" in header_dict.keys():
-          plt.plot(range(1, len(tint)+1), tint)
-      if "tint1" in header_dict.keys() or "tint_vnir" in header_dict.keys():
-          plt.plot(range(1, len(tint1)+1), tint1, label = 'VNIR')
-      if "tint2" in header_dict.keys() or "tint_swir" in header_dict.keys():
-         plt.plot(range(1, len(tint2)+1), tint2, label = 'SWIR')
-      if ("tint1" in header_dict.keys() and "tint2" in header_dict.keys() or
-          "tint_vnir" in header_dict.keys() and "tint_swir" in header_dict.keys()):
-         plt.ylim(min(min(tint1), min(tint2))-1, max(max(tint1), max(tint2))+1)
-         plt.legend()
-      plt.xlabel('File Index')
-      plt.ylabel('Integration Time, ms')
-      if args.outdir is not None:
-         plt.savefig(os.path.join(args.outdir, 'tint.png'))
-      plt.show()
-
-   if "nbands" in args.values or "all" in args.values:
-      plt.plot(range(1, len(nbands)+1), nbands)
-      plt.xlabel('File Index')
-      plt.ylabel('Number of bands')
-      if args.outdir is not None:
-         plt.savefig(os.path.join(args.outdir, 'nbands.png'))
-      plt.show()
-
-   if "nsamples" in args.values or "all" in args.values:
-      plt.plot(range(1, len(nsamples)+1), nsamples)
-      plt.xlabel('File Index')
-      plt.ylabel('Number of spatial samples')
-      if args.outdir is not None:
-         plt.savefig(os.path.join(args.outdir, 'nsamples.png'))
-      plt.show()
-
-   if "nlines" in args.values:
-      plt.plot(range(1, len(nlines)+1), nlines)
-      plt.xlabel('File Index')
-      plt.ylabel('Number of lines')
-      if args.outdir is not None:
-         plt.savefig(os.path.join(args.outdir, 'nlines.png'))
-      plt.show()
-
-   if "binning" in args.values or "all" in args.values:
-      if "binning" in header_dict.keys() and "binning2" not in header_dict.keys():
-          plt.plot(range(1, len(binning)+1), binning)
-      if ("binning" in header_dict.keys() and "binning2" in header_dict.keys() or
-          "binning_vnir" in header_dict.keys() and "binning_swir" in header_dict.keys()):
-         plt.plot(range(1, len(binning)+1), binning, label = 'VNIR')
-         plt.plot(range(1, len(binning2)+1), binning2, label = 'SWIR')
-         plt.ylim(min(min(binning), min(binning2))-1, max(max(binning), max(binning2))+1)
-         plt.legend()
-      plt.xlabel('File Index')
-      plt.ylabel('Spectral Binning Factor')
-      if args.outdir is not None:
-         plt.savefig(os.path.join(args.outdir, 'binning.png'))
-      plt.show()
-
-   if "temp" in args.values or "all" in args.values:
-      plt.plot(range(1, len(temp)+1), temp)
-      plt.xlabel('File Index')
-      plt.ylabel('Temperature of Detector, K')
-      if args.outdir is not None:
-         plt.savefig(os.path.join(args.outdir, 'temp.png'))
-      plt.show()
+   #Loop for plotting each item from the dicttoplot
+   for item in dicttoplot.keys():
+      if item in args.values or 'all' in args.values:
+         ylims = []
+         for each in dicttoplot[item]:
+            if each in header_dict:
+               plt.plot(dicttoplot[item][each],label=each)
+               plt.xlabel(labeldict[item]['xlabel'])
+               plt.ylabel(labeldict[item]['ylabel'])
+               ylims.append(min(dicttoplot[item][each]))
+               ylims.append(max(dicttoplot[item][each]))
+         # set y axis outside data
+         plt.ylim(min(ylims)-1, max(ylims)+1)
+      
+         if args.outdir is not None:
+            plt.savefig(os.path.join(args.outdir,labeldict[item]['filename']))
+         plt.show()
 
    # Save (all) parameters to csv if requested
    if args.outcsv is not None:
