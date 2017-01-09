@@ -4,8 +4,7 @@
 Gets information from multiple ENVI header files and plots them or saves
 to a file. Also has the option to save all values to a csv file. Assumes that if
 there are 2 detectors, one is VNIR and the second is SWIR. Can be used on 
-raw, level 1 or level 3 headers. Will display a blank plot if the value is missing
-from all headers. Applications could be to examine the varitaion in length of 
+raw, level 1 or level 3 headers. Applications could be to examine the varitaion in length of 
 files for a particualr project, check consistency in settings such as frame rate
 and integration time or to examine the temperature of the detector to confirm
 that it is fully cooled and stable for all acquisitions.
@@ -193,7 +192,7 @@ if __name__ == "__main__":
       if item in args.values or 'all' in args.values:
          ylims = []
          for each in dicttoplot[item]:
-            if np.nansum(dicttoplot[item][each])==0:
+            if np.isnan(np.nansum(dicttoplot[item][each])):
                continue
             plt.plot(dicttoplot[item][each],label=each)
             plt.xlabel(labeldict[item]['xlabel'])
@@ -201,10 +200,12 @@ if __name__ == "__main__":
             ylims.append(np.nanmin(dicttoplot[item][each]))
             ylims.append(np.nanmax(dicttoplot[item][each]))
 
-         if np.isnan(min(ylims)) and np.isnan(max(ylims)): #no data to plot
+         if not ylims: #no data to plot
             continue
          # set y axis outside data
          plt.ylim(min(ylims)-1, max(ylims)+1)
+         if len(ylims) > 2:
+            plt.legend()
       
          if args.outdir is not None:
             plt.savefig(os.path.join(args.outdir,labeldict[item]['filename']))
