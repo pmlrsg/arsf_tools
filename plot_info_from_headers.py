@@ -30,6 +30,7 @@ import sys
 from arsf_envi_reader import envi_header
 import matplotlib.pyplot as plt
 import re
+import numpy as np
 
 def tryint(s):
    """ Converts a string number to an integer or returns non-numbers as strings.
@@ -117,39 +118,65 @@ if __name__ == "__main__":
       # Get supplimentary info for csv if available
       if 'acquisition date' in header_dict.keys():
          dates.append(header_dict['acquisition date'].split(' ')[-1])
+      else:
+         dates.append(float('nan'))
       if 'gps start time' in header_dict.keys():
          start_times.append(header_dict['gps start time'].split(' ')[-1])
+      else:
+         start_times.append(float('nan'))
       if 'gps stop time' in header_dict.keys():
          stop_times.append(header_dict['gps stop time'].split(' ')[-1])
+      else:
+         stop_times.append(float('nan'))
       if "bands" in header_dict.keys():
          nbands.append(int(header_dict['bands']))
+      else:
+         nbands.append(float('nan'))
       if "samples" in header_dict.keys():
          nsamples.append(int(header_dict['samples']))
+      else:
+         nsamples.append(float('nan'))
       if "lines" in header_dict.keys():
          nlines.append(int(header_dict['lines']))
+      else:
+         nlines.append(float('nan'))
       if "fps" in header_dict.keys():
          fps.append(float(header_dict['fps']))
+      else:
+         fps.append(float('nan'))
       if "tint" in header_dict.keys():
          tint.append(float(header_dict['tint']))
+      else:
+         tint.append(float('nan'))
       if "tint1" in header_dict.keys():
          tint1.append(float(header_dict['tint1']))
-      if "tint_vnir" in header_dict.keys():
+      elif "tint_vnir" in header_dict.keys():
          tint1.append(float(header_dict['tint_vnir']))
+      else:
+         tint1.append(float('nan'))
       if "tint2" in header_dict.keys():
          tint2.append(float(header_dict['tint2']))
-      if "tint_swir" in header_dict.keys():
+      elif "tint_swir" in header_dict.keys():
          tint2.append(float(header_dict['tint_swir']))
+      else:
+         tint2.append(float('nan'))
       if "binning" in header_dict.keys():
          binning.append(int(header_dict['binning'][0]))
-      if "binning_vnir" in header_dict.keys():
+      elif "binning_vnir" in header_dict.keys():
          binning.append(int(header_dict['binning_vnir'][0]))
+      else:
+         binning.append(float('nan'))
       if "binning2" in header_dict.keys():
          binning2.append(int(header_dict['binning2'][0]))
-      if "binning_swir" in header_dict.keys():
+      elif "binning_swir" in header_dict.keys():
          binning2.append(int(header_dict['binning_swir'][0]))
+      else:
+         binning2.append(float('nan'))
       if "temperature" in header_dict.keys():
       # won't be in dark frame files
          temp.append(float(header_dict['temperature'].split(',')[0]))
+      else:
+         temp.append(float('nan'))
 
    #Dynamic dictionary created from the keys in the header_dict
    dicttoplot={'fps': {'fps' : fps} ,
@@ -166,12 +193,16 @@ if __name__ == "__main__":
       if item in args.values or 'all' in args.values:
          ylims = []
          for each in dicttoplot[item]:
-            if each in header_dict:
-               plt.plot(dicttoplot[item][each],label=each)
-               plt.xlabel(labeldict[item]['xlabel'])
-               plt.ylabel(labeldict[item]['ylabel'])
-               ylims.append(min(dicttoplot[item][each]))
-               ylims.append(max(dicttoplot[item][each]))
+            if np.nansum(dicttoplot[item][each])==0:
+               continue
+            plt.plot(dicttoplot[item][each],label=each)
+            plt.xlabel(labeldict[item]['xlabel'])
+            plt.ylabel(labeldict[item]['ylabel'])
+            ylims.append(np.nanmin(dicttoplot[item][each]))
+            ylims.append(np.nanmax(dicttoplot[item][each]))
+
+         if np.isnan(min(ylims)) and np.isnan(max(ylims)): #no data to plot
+            continue
          # set y axis outside data
          plt.ylim(min(ylims)-1, max(ylims)+1)
       
@@ -181,6 +212,15 @@ if __name__ == "__main__":
 
    # Save (all) parameters to csv if requested
    if args.outcsv is not None:
+
+      # first check all files have same records
+      for item in dicttoplot.keys():
+         for each in dicttoplot[item]:
+            if np.nansum(dicttoplot[item][each])>0:
+               if len(dicttoplot[item][each]) != len(nbands):
+                  print("Some header files are missing certain entries. Cannot create csv.")
+                  sys.exit(1)
+
       with open(args.outcsv,'w') as f:
          out_file = csv.writer(f)
 
@@ -188,60 +228,60 @@ if __name__ == "__main__":
             # For first line write header
             if i == 0:
                header_row = ['File']       
-               if len(dates)>0:
+               if len(dates)==len(nbands):
                   header_row.append('Date')
-               if len(start_times)>0:
+               if len(start_times)==len(nbands):
                   header_row.append('UTC_Start_Time')
-               if len(stop_times)>0:
+               if len(stop_times)==len(nbands):
                   header_row.append('UTC_Stop_Time')
-               if len(nbands)>0:
+               if np.nansum(nbands)>0:
                   header_row.append('Bands')
-               if len(nsamples)>0:
+               if np.nansum(nsamples)>0:
                   header_row.append('Samples')
-               if len(nlines)>0:
+               if np.nansum(nlines)>0:
                   header_row.append('Lines')
-               if len(fps)>0:
+               if np.nansum(fps)>0:
                   header_row.append('FPS')
-               if len(tint)>0:
+               if np.nansum(tint)>0:
                   header_row.append('Tint, ms')
-               if len(tint1)>0:
+               if np.nansum(tint1)>0:
                   header_row.append('Tint1, ms')
-               if len(tint2)>0:
+               if np.nansum(tint2)>0:
                   header_row.append('Tint2, ms')
-               if len(binning)>0:
+               if np.nansum(binning)>0:
                   header_row.append('Spectral_Binning')
-               if len(binning2)>0:
+               if np.nansum(binning2)>0:
                   header_row.append('Spectral_Bining2')
-               if len(temp)>0:
+               if np.nansum(temp)>0:
                   header_row.append('Temp, K')
                out_file.writerow(header_row)
             else:
                out_line = [args.inputfiles[i]]
-               if len(dates)>0:
+               if len(dates)==len(nbands):
                   out_line.append(dates[i])
-               if len(start_times)>0:
+               if len(start_times)==len(nbands):
                   out_line.append(start_times[i])
-               if len(stop_times)>0:
+               if len(stop_times)==len(nbands):
                   out_line.append(stop_times[i])
-               if len(nbands)>0:
+               if np.nansum(nbands)>0:
                   out_line.append(nbands[i])
-               if len(nsamples)>0:
+               if np.nansum(nsamples)>0:
                   out_line.append(nsamples[i])
-               if len(nlines)>0:
+               if np.nansum(nlines)>0:
                   out_line.append(nlines[i])
-               if len(fps)>0:
+               if np.nansum(fps)>0:
                   out_line.append(fps[i])
-               if len(tint)>0:
+               if np.nansum(tint)>0:
                   out_line.append(tint[i])
-               if len(tint1)>0:
+               if np.nansum(tint1)>0:
                   out_line.append(tint1[i])
-               if len(tint2)>0:
+               if np.nansum(tint2)>0:
                   out_line.append(tint2[i])
-               if len(binning)>0:
+               if np.nansum(binning)>0:
                   out_line.append(binning[i])
-               if len(binning2)>0:
+               if np.nansum(binning2)>0:
                   out_line.append(binning2[i])
-               if len(temp)>0:
+               if np.nansum(temp)>0:
                   out_line.append(temp[i])
                out_file.writerow(out_line)
 
