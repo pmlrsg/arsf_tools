@@ -78,12 +78,12 @@ if __name__ == "__main__":
 
    #Static dictionary filled with all the information for every plot (titles, labels filename etc)
    labeldict={'fps' : {'xlabel':'File Index','ylabel':'Frames per second','filename':'fps.png'},
-               'tint' : {'xlabel':'File Index','ylabel':'Integration time, ms','filename':'tint.png'},
+               'tint' : {'xlabel':'File Index','ylabel':'Integration time (ms)','filename':'tint.png'},
                'nbands' : {'xlabel':'File Index','ylabel':'Number of bands','filename':'nbands.png'},
                'nsamples' : {'xlabel':'File Index','ylabel':'Number of spatial samples','filename':'nsamples.png'},
                'nlines' : {'xlabel':'File Index','ylabel':'Number of lines','filename':'nlines.png'},
                'binning' : {'xlabel':'File Index','ylabel':'Spectral binning factor','filename':'binning.png'},
-               'temp' : {'xlabel':'File Index','ylabel':'Temperature of detector, ms','filename':'temp.png'}
+               'temp' : {'xlabel':'File Index','ylabel':'Temperature of detector (K)','filename':'temp.png'}
    }
 
    # Set up values to plot
@@ -244,11 +244,11 @@ if __name__ == "__main__":
                if np.nansum(fps)>0:
                   header_row.append('FPS')
                if np.nansum(tint)>0:
-                  header_row.append('Tint, ms')
+                  header_row.append('Tint (ms)')
                if np.nansum(tint1)>0:
-                  header_row.append('Tint1, ms')
+                  header_row.append('Tint1 (ms)')
                if np.nansum(tint2)>0:
-                  header_row.append('Tint2, ms')
+                  header_row.append('Tint2 (ms)')
                if np.nansum(binning)>0:
                   header_row.append('Spectral_Binning')
                if np.nansum(binning2)>0:
