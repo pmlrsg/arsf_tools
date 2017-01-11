@@ -209,7 +209,8 @@ if __name__ == "__main__":
       
          if args.outdir is not None:
             plt.savefig(os.path.join(args.outdir,labeldict[item]['filename']))
-         plt.show()
+         else:
+            plt.show()
 
    # Save (all) parameters to csv if requested
    if args.outcsv is not None:
