@@ -95,10 +95,7 @@ A script to print information from a header file and optionally save wavelengths
 A script to plot information from multiple header files and optionally save parameters to a CSV file.
 Requires matplotlib and numpy to be installed. If you are using conda (see above) these can be installed using:
 ```
-conda install matplotlib
-```
-```
-conda install numpy
+conda install numpy matplotlib
 ```
 
 **copy_header_info.py**
