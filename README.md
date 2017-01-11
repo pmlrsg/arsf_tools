@@ -90,6 +90,14 @@ A script to assign missing projection information to a GDAL dataset. Requires GD
 
 A script to print information from a header file and optionally save wavelengths to a CSV file.
 
+**plot_info_from_headers.py**
+
+A script to plot information from multiple header files and optionally save parameters to a CSV file.
+Requires matplotlib and numpy to be installed. If you are using conda (see above) these can be installed using:
+```
+conda install numpy matplotlib
+```
+
 **copy_header_info.py**
 
 Copy selected keys from one header to another.
