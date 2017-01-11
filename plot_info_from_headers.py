@@ -30,6 +30,7 @@ from arsf_envi_reader import envi_header
 import matplotlib.pyplot as plt
 import re
 import numpy as np
+import glob
 
 def tryint(s):
    """ Converts a string number to an integer or returns non-numbers as strings.
@@ -66,6 +67,12 @@ if __name__ == "__main__":
    parser.add_argument("-k","--keep_order", required=False, action = "store_true",
                            help="If used, will keep the order specified in the commmand line")
    args = parser.parse_args()
+
+   # On Windows don't have shell expansion so fake it using glob    
+   if args.inputfiles[0].find('*') > -1:
+      args.inputfiles = glob.glob(args.inputfiles[0])
+   else:
+      args.inputfiles = args.inputfiles
 
    # Check multiple files provided
    if len(args.inputfiles) < 2:
