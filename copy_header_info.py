@@ -27,61 +27,60 @@ import sys
 from arsf_envi_reader import envi_header
 
 def copy_header_dict_items(source_header_dict, target_header_dict, keys):
-   """
-   Copy selected keys from source header to target. Replacing if they exist
-   """
-   for key in keys:
-      # Change to lower case
-      key = key.lower()
-      try:
-         target_header_dict[key] = source_header_dict[key]
-         print("Copied {}".format(key))
-      except KeyError:
-         print("Could not find {}. Skipping".format(key),file=sys.stderr)
+    """
+    Copy selected keys from source header to target. Replacing if they exist
+    """
+    for key in keys:
+        # Change to lower case
+        key = key.lower()
+        try:
+            target_header_dict[key] = source_header_dict[key]
+            print("Copied {}".format(key))
+        except KeyError:
+            print("Could not find {}. Skipping".format(key),file=sys.stderr)
 
 def run_copy_header(sourceheader, targetheader, keys):
-   """
-   Copy information from sourceheader to targetheader
-   for given keys.
+    """
+    Copy information from sourceheader to targetheader
+    for given keys.
 
-   """
-   # Read header info to dictionaries
-   source_header_dict = envi_header.read_hdr_file(args.sourceheader[0])
-   target_header_dict = envi_header.read_hdr_file(args.targetheader[0])
+    """
+    # Read header info to dictionaries
+    source_header_dict = envi_header.read_hdr_file(args.sourceheader[0])
+    target_header_dict = envi_header.read_hdr_file(args.targetheader[0])
 
-   copy_header_dict_items(source_header_dict, target_header_dict, args.keys)
+    copy_header_dict_items(source_header_dict, target_header_dict, args.keys)
 
-   # Make a backup copy of the origional header
-   try:
-      if os.path.isfile(args.targetheader[0] + '.bak'):
-         print("Backup file {}.bak already exists. Please remove "
-               "and retry".format(args.targetheader[0]), file=sys.stderr)
-         sys.exit(1)
-      shutil.copy2(args.targetheader[0],args.targetheader[0] + '.bak')
-   except IOError:
-      print("Could create backup copy of header in same destination as source "
-            "- possibly due to folder permissions. Aborting",file=sys.stderr)
-   except Exception:
-      raise
+    # Make a backup copy of the origional header
+    try:
+        if os.path.isfile(args.targetheader[0] + '.bak'):
+            print("Backup file {}.bak already exists. Please remove "
+                  "and retry".format(args.targetheader[0]), file=sys.stderr)
+            sys.exit(1)
+        shutil.copy2(args.targetheader[0],args.targetheader[0] + '.bak')
+    except IOError:
+        print("Could create backup copy of header in same destination as source "
+              "- possibly due to folder permissions. Aborting",file=sys.stderr)
+    except Exception:
+        raise
 
-   envi_header.write_envi_header(args.targetheader[0], target_header_dict)
+    envi_header.write_envi_header(args.targetheader[0], target_header_dict)
 
-   print("Copied items to {0}, origional header "
-         "saved as {0}.bak".format(args.targetheader[0]))
+    print("Copied items to {0}, origional header "
+          "saved as {0}.bak".format(args.targetheader[0]))
 
 if __name__ == "__main__":
 
-   parser = argparse.ArgumentParser(description='''
-                       Copy information from one ENVI header to another.
-                       Created by ARSF-DAN at Plymouth Marine Laboratory.
-                       Latest version available from https://github.com/pmlrsg/arsf_tools/.''')
-   parser.add_argument("sourceheader", nargs=1,type=str,
-                           help="Header containing information to copy from")
-   parser.add_argument("targetheader", nargs=1,type=str,
-                           help="Header to copy fields into")
-   parser.add_argument("-k","--keys", nargs='*', required=False, type=str,
-                           help="Keys to copy from 'sourceheader' to 'targetheader'")
-   args = parser.parse_args()
+    parser = argparse.ArgumentParser(description='''
+                        Copy information from one ENVI header to another.
+                        Created by ARSF-DAN at Plymouth Marine Laboratory.
+                        Latest version available from https://github.com/pmlrsg/arsf_tools/.''')
+    parser.add_argument("sourceheader", nargs=1,type=str,
+                            help="Header containing information to copy from")
+    parser.add_argument("targetheader", nargs=1,type=str,
+                            help="Header to copy fields into")
+    parser.add_argument("-k","--keys", nargs='*', required=False, type=str,
+                            help="Keys to copy from 'sourceheader' to 'targetheader'")
+    args = parser.parse_args()
 
-   run_copy_header(args.sourceheader[0], args.targetheader[0], args.keys)
-
+    run_copy_header(args.sourceheader[0], args.targetheader[0], args.keys)
