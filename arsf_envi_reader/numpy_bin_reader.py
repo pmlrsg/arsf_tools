@@ -64,6 +64,14 @@ class _BinaryReader(collections.Iterator):
     @abc.abstractmethod
     def __next__(self): pass
 
+    @abc.abstractmethod
+    def read_line(self, line_number):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def read_band(self, band_number):
+        raise NotImplementedError
+
     def next(self):
         return self.__next__()
 
@@ -163,6 +171,33 @@ class BilReader(_BinaryReader):
 
         return line
 
+    def read_line(self, line_number):
+        """
+        Read data for a user specified line
+
+        Currently only supported if ARSF binary ready (binfile) library
+        is available.
+        """
+        if HAVE_ARSF_BINARYREADER:
+            line = self.binreader_file.Readline(line_number)
+            return line
+        else:
+            raise NotImplementedError("Need 'binfile' library to specify line")
+
+    def read_band(self, band_number):
+        """
+        Read data for a user specified band
+
+        Currently only supported if ARSF binary ready (binfile) library
+        is available.
+        """
+        if HAVE_ARSF_BINARYREADER:
+            band = self.binreader_file.Readband(band_number)
+            return band[1]
+        else:
+            raise NotImplementedError("Need 'binfile' library to specify band")
+
+
 class BsqReader(_BinaryReader):
     """
     Class to read ENVI BSQ file band at a time
@@ -219,3 +254,29 @@ class BsqReader(_BinaryReader):
         line = line.reshape(self.samples, self.lines)
 
         return line
+
+    def read_line(self, line_number):
+        """
+        Read data for a user specified line
+
+        Currently only supported if ARSF binary ready (binfile) library
+        is available.
+        """
+        if HAVE_ARSF_BINARYREADER:
+            line = self.binreader_file.Readline(line_number)
+            return line
+        else:
+            raise NotImplementedError("Need 'binfile' library to specify line")
+
+    def read_band(self, band_number):
+        """
+        Read data for a user specified band
+
+        Currently only supported if ARSF binary ready (binfile) library
+        is available.
+        """
+        if HAVE_ARSF_BINARYREADER:
+            band = self.binreader_file.Readband(band_number)
+            return band[1]
+        else:
+            raise NotImplementedError("Need 'binfile' library to specify band")
