@@ -107,7 +107,7 @@ class ExtractPixels(object):
                 except Exception as err:
                     raise Exception("Image has more than three bands and no "
                                     "bands specified. Could not read from "
-                                    "header - pleas specify"
+                                    "header - please specify"
                                     "\nError message {}".format(err))
 
         if red_band_num > imagebands or \
