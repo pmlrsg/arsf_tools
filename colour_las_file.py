@@ -38,15 +38,43 @@ import laspy
 import numpy
 from osgeo import gdal
 
+from arsf_envi_reader import envi_header
+
 #: Debug mode - prints out more information useful for debugging.
 DEBUG = False
+
+DEFAULT_WAVELENGTHS = [640, 540, 470]
+
+def get_bands_from_wavelengths(input_image, wavelengths=DEFAULT_WAVELENGTHS):
+    """
+    Get bands for a list of wavelengths (useful for creating three band
+    composites).
+
+    Function adapted from one in createimage.py
+    """
+    input_header = envi_header.find_hdr_file(input_image)
+
+    if input_header is None:
+        raise Exception("Need to use ENVI header to get bands")
+
+    header_dict = envi_header.read_hdr_file(input_header)
+    image_wavelengths = header_dict['wavelength'].split(',')
+
+    out_bands = []
+    for wavelength in wavelengths:
+        band = min(range(len(image_wavelengths)),
+                   key=lambda x:abs(float(image_wavelengths[x])-wavelength))
+        out_bands.append(band)
+
+    return out_bands
+
 
 class ExtractPixels(object):
     """
     Class to extract RGB values for a given pixel
     """
-    def __init__(self, input_image, red_band_num=1,
-                 green_band_num=2, blue_band_num=3):
+    def __init__(self, input_image, red_band_num=None,
+                 green_band_num=None, blue_band_num=None):
         self.input_ds = gdal.Open(input_image, gdal.GA_ReadOnly)
 
         if self.input_ds is None:
@@ -60,6 +88,27 @@ class ExtractPixels(object):
         self.pixel_y_size = geotransform[5]
 
         imagebands = self.input_ds.RasterCount
+
+        # Check if image bands have been provided.
+        if red_band_num is None and green_band_num is None \
+           and blue_band_num is None:
+            # For a three band image assume 1,2,3
+            if imagebands == 3:
+                red_band_num = 1
+                green_band_num = 2
+                blue_band_num = 3
+            # For more than three bands try to get from wavelengths
+            else:
+                try:
+                    bands = get_bands_from_wavelengths(input_image)
+                    red_band_num = bands[0]
+                    green_band_num = bands[1]
+                    blue_band_num = bands[2]
+                except Exception as err:
+                    raise Exception("Image has more than three bands and no "
+                                    "bands specified. Could not read from "
+                                    "header - please specify"
+                                    "\nError message {}".format(err))
 
         if red_band_num > imagebands or \
            green_band_num > imagebands or \
@@ -146,15 +195,15 @@ if __name__ == "__main__":
                         help="Image to extract values from.")
     parser.add_argument("--red", required=False,
                         type=int,
-                        default=1,
+                        default=None,
                         help="Band in image to use for red channel")
     parser.add_argument("--green", required=False,
                         type=int,
-                        default=2,
+                        default=None,
                         help="Band in image to use for green channel")
     parser.add_argument("--blue", required=False,
                         type=int,
-                        default=3,
+                        default=None,
                         help="Band in image to use for blue channel")
     parser.add_argument("--scale", required=False,
                         action="store_true",
