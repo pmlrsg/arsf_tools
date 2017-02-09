@@ -58,12 +58,12 @@ def get_bands_from_wavelengths(input_image, wavelengths=DEFAULT_WAVELENGTHS):
         raise Exception("Need to use ENVI header to get bands")
 
     header_dict = envi_header.read_hdr_file(input_header)
-    image_wavelenghts = header_dict['wavelength'].split(',')
+    image_wavelengths = header_dict['wavelength'].split(',')
 
     out_bands = []
     for wavelength in wavelengths:
-        band = min(range(len(image_wavelenghts)),
-                   key=lambda x:abs(float(image_wavelenghts[x])-wavelength))
+        band = min(range(len(image_wavelengths)),
+                   key=lambda x:abs(float(image_wavelengths[x])-wavelength))
         out_bands.append(band)
 
     return out_bands
