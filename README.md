@@ -61,7 +61,7 @@ on each line or LAS.
 
 For a description of the .all format used see:
 
-https://arsf-dan.nerc.ac.uk/trac/wiki/Processing/LIDARDEMs
+https://nerc-arf-dan.pml.ac.uk/trac/wiki/Processing/LIDARDEMs
 
 For conversion to LAS Requires LAStools > 160730 to use the '-utm ZZnorth'
 flag.
