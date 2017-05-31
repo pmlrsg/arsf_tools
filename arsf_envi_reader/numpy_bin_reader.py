@@ -10,6 +10,8 @@ Suggestion for using collections.Itterator from:
 
 http://stackoverflow.com/questions/4019971/how-to-implement-iter-self-for-a-container-object-python
 
+check_size written by Terry Cain and originally part of bil_library
+
 """
 
 ###########################################################
@@ -20,6 +22,7 @@ http://stackoverflow.com/questions/4019971/how-to-implement-iter-self-for-a-cont
 
 import abc
 import collections
+import os
 import numpy
 from . import envi_header
 
@@ -40,8 +43,11 @@ class _BinaryReader(collections.Iterator):
         self.binreader_file = None
         self.file_handler = None
 
-        header_file = envi_header.find_hdr_file(input_file)
-        hdr_data_dict = envi_header.read_hdr_file(header_file)
+        # File name of binary file
+        self.binary_file = input_file
+        # File name of header file
+        self.header_file = envi_header.find_hdr_file(input_file)
+        hdr_data_dict = envi_header.read_hdr_file(self.header_file)
 
         self.samples = int(hdr_data_dict["samples"])
         self.lines = int(hdr_data_dict["lines"])
@@ -56,9 +62,24 @@ class _BinaryReader(collections.Iterator):
         self.current_band = -1
         self.interleave_checked = False
 
+        # Open binary file
         if HAVE_ARSF_BINARYREADER:
-            self.binreader_file = binfile.BinFile(input_file)
+            try:
+                self.binreader_file = binfile.BinFile(input_file)
+            except Exception as err:
+                # If opening the file fails check header and binary file
+                # sizes match.
+                if not self.check_size(input_file):
+                    raise IOError("Could not open file, "
+                                  "size doesn't match header")
+                # If this isn't the problem raise the exception
+                else:
+                    raise
         else:
+            # Before opening check file size
+            if not self.check_size(input_file):
+                raise IOError("Could not open file, "
+                              "size doesn't match header")
             self.file_handler = open(input_file, "rb")
 
     @abc.abstractmethod
@@ -80,6 +101,24 @@ class _BinaryReader(collections.Iterator):
         Return a dictionary of parameters from header
         """
         return self.hdr_data_dict
+
+    def get_num_samples(self):
+        """
+        Returns the number of samples as an integer
+        """
+        return self.samples
+
+    def get_num_lines(self):
+        """
+        Returns the number of lines as an integer
+        """
+        return self.lines
+
+    def get_num_bands(self):
+        """
+        Returns the number of bands as an integer
+        """
+        return self.bands
 
     def have_arsf_binaryreader(self):
         """
@@ -105,10 +144,38 @@ class _BinaryReader(collections.Iterator):
 
         return self.interleave_checked
 
+    @staticmethod
+    def check_size(binary_file):
+        """
+        Checks if the size of the binary file matches that of the header
+
+        Implemented as a static method so it can be used without
+        initiating a binfile instance, which would raise an exception if the
+        size didn't match the header.
+        """
+        # Current size of binary file in bytes
+        actual_file_size = os.path.getsize(binary_file)
+
+        # Calculate size from header
+        header_file = envi_header.find_hdr_file(binary_file)
+        hdr_data_dict = envi_header.read_hdr_file(header_file)
+
+        samples = int(hdr_data_dict["samples"])
+        lines = int(hdr_data_dict["lines"])
+        bands = int(hdr_data_dict["bands"])
+        numpy_dtype = \
+                envi_header.ENVI_TO_NUMPY_DTYPE[hdr_data_dict["data type"]]
+        byte_size = numpy.dtype(numpy_dtype).itemsize
+
+        calculated_size = samples * lines * bands * byte_size
+
+        # The calculated size should be the same as the current size
+        # so the difference between the two should be 0
+        return actual_file_size - calculated_size == 0
+
     def __del__(self):
         if self.file_handler is not None:
             self.file_handler.close()
-
 
 
 class BilReader(_BinaryReader):
