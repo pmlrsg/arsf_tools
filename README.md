@@ -110,6 +110,14 @@ A script to batch map level 1b files to level 3b using APL.
 
 Library for processing hyperspectral data. Available from https://github.com/arsf/apl
 
+Thermal
+--------
+
+**owl_temp_emissivity.py**
+
+A script to calculate temperature and emissivity from Owl data.
+Available from: https://github.com/pmlrsg/owl_temp_emissivity
+
 Camera
 -------
 
