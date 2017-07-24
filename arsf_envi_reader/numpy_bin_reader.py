@@ -242,7 +242,7 @@ class BilReader(_BinaryReader):
         """
         Read data for a user specified line
 
-        Currently only supported if ARSF binary ready (binfile) library
+        Currently only supported if ARSF binary reader (binfile) library
         is available.
         """
         if HAVE_ARSF_BINARYREADER:
@@ -255,7 +255,7 @@ class BilReader(_BinaryReader):
         """
         Read data for a user specified band
 
-        Currently only supported if ARSF binary ready (binfile) library
+        Currently only supported if ARSF binary reader (binfile) library
         is available.
         """
         if HAVE_ARSF_BINARYREADER:
@@ -326,7 +326,7 @@ class BsqReader(_BinaryReader):
         """
         Read data for a user specified line
 
-        Currently only supported if ARSF binary ready (binfile) library
+        Currently only supported if ARSF binary reader (binfile) library
         is available.
         """
         if HAVE_ARSF_BINARYREADER:
@@ -339,7 +339,7 @@ class BsqReader(_BinaryReader):
         """
         Read data for a user specified band
 
-        Currently only supported if ARSF binary ready (binfile) library
+        Currently only supported if ARSF binary reader (binfile) library
         is available.
         """
         if HAVE_ARSF_BINARYREADER:
