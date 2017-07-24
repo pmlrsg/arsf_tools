@@ -57,9 +57,13 @@ def find_hdr_file(rawfilename):
 
     return hdrfile
 
-def read_hdr_file(hdrfilename):
+def read_hdr_file(hdrfilename, keep_case=False):
     """
     Read information from ENVI header file to a dictionary.
+
+    By default all keys are converted to lowercase. To stop this behaviour
+    and keep the origional case set 'keep_case = True'
+
     """
     output = collections.OrderedDict()
     comments = ""
@@ -82,8 +86,10 @@ def read_hdr_file(hdrfilename):
             # Split line on first equals sign
             elif re.search("=", currentline) is not None:
                 linesplit = re.split("=", currentline, 1)
-                # Convert all values to lower case
-                key = linesplit[0].strip().lower()
+                key = linesplit[0].strip()
+                # Convert all values to lower case unless requested to keep.
+                if not keep_case:
+                    key = key.lower()
                 value = linesplit[1].strip()
 
                 # If value starts with an open brace, it's the start of a block
