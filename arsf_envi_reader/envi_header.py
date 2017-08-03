@@ -57,9 +57,13 @@ def find_hdr_file(rawfilename):
 
     return hdrfile
 
-def read_hdr_file(hdrfilename):
+def read_hdr_file(hdrfilename, keep_case=False):
     """
     Read information from ENVI header file to a dictionary.
+
+    By default all keys are converted to lowercase. To stop this behaviour
+    and keep the origional case set 'keep_case = True'
+
     """
     output = collections.OrderedDict()
     comments = ""
@@ -76,11 +80,16 @@ def read_hdr_file(hdrfilename):
     for currentline in hdrfile:
         # ENVI headers accept blocks bracketed by curly braces - check for these
         if not inblock:
+            # Check for a comment
+            if re.search("^;", currentline) is not None:
+                comments += currentline
             # Split line on first equals sign
-            if re.search("=", currentline) is not None:
+            elif re.search("=", currentline) is not None:
                 linesplit = re.split("=", currentline, 1)
-                # Convert all values to lower case
-                key = linesplit[0].strip().lower()
+                key = linesplit[0].strip()
+                # Convert all values to lower case unless requested to keep.
+                if not keep_case:
+                    key = key.lower()
                 value = linesplit[1].strip()
 
                 # If value starts with an open brace, it's the start of a block
@@ -96,9 +105,6 @@ def read_hdr_file(hdrfilename):
                         value = re.sub("}$", "", value, 1)
                 value = value.strip()
                 output[key] = value
-            # Check for a comment
-            elif re.search("^;", currentline) is not None:
-                comments += currentline
         else:
             # If we're in a block, just read the line, strip whitespace
             # (and any closing brace ending the block) and add the whole thing
@@ -118,6 +124,8 @@ def read_hdr_file(hdrfilename):
 def write_envi_header(filename, header_dict):
     """
     Writes a dictionary to an ENVI header file
+
+    Comments can be added to the end of the file using the '_comments' key.
     """
 
     # Open header file for writing
@@ -138,5 +146,14 @@ def write_envi_header(filename, header_dict):
                 hdrfile.write("{} = {}\n".format(key, header_dict[key]))
 
     # Write out comments at the end
-    hdrfile.write(header_dict['_comments'])
+    # Check they start with ';' and add one if they don't
+    for comment_line in header_dict['_comments'].split('\n'):
+        if re.search("^;", comment_line) is None:
+            comment_line = ";{}\n".format(comment_line)
+        else:
+            comment_line = "{}\n".format(comment_line)
+        # Check line contains a comment before writing out.
+        if comment_line.strip() != ";":
+            hdrfile.write(comment_line)
     hdrfile.close()
+
