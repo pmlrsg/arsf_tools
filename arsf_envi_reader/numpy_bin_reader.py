@@ -93,6 +93,10 @@ class _BinaryReader(collections.Iterator):
     def read_band(self, band_number):
         raise NotImplementedError
 
+    @abc.abstractmethod
+    def read_pixel(self, sample_number, line_number):
+        raise NotImplementedError
+
     def next(self):
         return self.__next__()
 
@@ -241,15 +245,23 @@ class BilReader(_BinaryReader):
     def read_line(self, line_number):
         """
         Read data for a user specified line
-
-        Currently only supported if ARSF binary reader (binfile) library
-        is available.
         """
         if HAVE_ARSF_BINARYREADER:
             line = self.binreader_file.Readline(line_number)
-            return line
         else:
-            raise NotImplementedError("Need 'binfile' library to specify line")
+            # Reset file
+            self.file_handler.seek(0)
+            # Seek ahead
+            if line_number > 0:
+                self.file_handler.seek(line_number*self.line_size)
+            line = numpy.fromstring(self.file_handler.read(self.line_size),
+                                    dtype=self.numpy_dtype)
+            # Reset file and line
+            self.file_handler.seek(0)
+            self.current_line = -1
+
+        line = line.reshape(self.bands, self.samples)
+        return line
 
     def read_band(self, band_number):
         """
@@ -264,6 +276,14 @@ class BilReader(_BinaryReader):
         else:
             raise NotImplementedError("Need 'binfile' library to specify band")
 
+    def read_pixel(self, sample_number, line_number):
+        """
+        Read all bands for a given pixel
+        """
+        line = self.read_line(line_number)
+        pixel = line[:, sample_number]
+
+        return pixel
 
 class BsqReader(_BinaryReader):
     """
@@ -310,17 +330,17 @@ class BsqReader(_BinaryReader):
 
         # If arsf_binaryreader is available read line using this
         if HAVE_ARSF_BINARYREADER:
-            line = self.binreader_file.Readband(self.current_band)[1]
+            band = self.binreader_file.Readband(self.current_band)[1]
         # If arsf_binaryreader is not available read using NumPy
         else:
-            line = numpy.fromstring(self.file_handler.read(self.band_size),
+            band = numpy.fromstring(self.file_handler.read(self.band_size),
                                     dtype=self.numpy_dtype)
-            if line.size < (self.samples * self.lines):
+            if band.size < (self.samples * self.lines):
                 raise StopIteration
 
-        line = line.reshape(self.samples, self.lines)
+        band = band.reshape(self.samples, self.lines)
 
-        return line
+        return band
 
     def read_line(self, line_number):
         """
@@ -338,12 +358,40 @@ class BsqReader(_BinaryReader):
     def read_band(self, band_number):
         """
         Read data for a user specified band
-
-        Currently only supported if ARSF binary reader (binfile) library
-        is available.
         """
         if HAVE_ARSF_BINARYREADER:
-            band = self.binreader_file.Readband(band_number)
-            return band[1]
+            band = self.binreader_file.Readband(band_number)[1]
         else:
             raise NotImplementedError("Need 'binfile' library to specify band")
+            # FIXME: Need to figure out why this isn't giving the correct
+            # values
+            # Reset file
+            self.file_handler.seek(0)
+            # Seek ahead
+            if band_number > 0:
+                self.file_handler.seek(band_number*self.band_size)
+            band = numpy.fromstring(self.file_handler.read(self.band_size),
+                                    dtype=self.numpy_dtype)
+            # Reset file and band
+            self.file_handler.seek(0)
+            self.current_band = -1
+
+        band = band.reshape(self.samples, self.lines)
+        return band
+
+    def read_pixel(self, sample_number, line_number):
+        """
+        Read all bands for a given pixel
+        """
+        pixel = numpy.zeros(self.bands, dtype=self.numpy_dtype)
+
+        for band_num in range(self.bands):
+            if HAVE_ARSF_BINARYREADER:
+                band = self.binreader_file.Readbandline(band_num, line_number)[1]
+                pixel[band_num] = band[sample_number]
+            else:
+                band = self.read_band(band_num)
+                pixel[band_num] = band[sample_number, line_number]
+
+        return pixel
+
