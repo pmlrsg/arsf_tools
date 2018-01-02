@@ -338,7 +338,7 @@ class BsqReader(_BinaryReader):
             if band.size < (self.samples * self.lines):
                 raise StopIteration
 
-        band = band.reshape(self.samples, self.lines)
+        band = band.reshape(self.lines, self.samples)
 
         return band
 
@@ -362,9 +362,6 @@ class BsqReader(_BinaryReader):
         if HAVE_ARSF_BINARYREADER:
             band = self.binreader_file.Readband(band_number)[1]
         else:
-            raise NotImplementedError("Need 'binfile' library to specify band")
-            # FIXME: Need to figure out why this isn't giving the correct
-            # values
             # Reset file
             self.file_handler.seek(0)
             # Seek ahead
@@ -376,7 +373,7 @@ class BsqReader(_BinaryReader):
             self.file_handler.seek(0)
             self.current_band = -1
 
-        band = band.reshape(self.samples, self.lines)
+        band = band.reshape(self.lines, self.samples)
         return band
 
     def read_pixel(self, sample_number, line_number):
@@ -391,7 +388,7 @@ class BsqReader(_BinaryReader):
                 pixel[band_num] = band[sample_number]
             else:
                 band = self.read_band(band_num)
-                pixel[band_num] = band[sample_number, line_number]
+                pixel[band_num] = band[line_number, sample_number]
 
         return pixel
 
