@@ -31,8 +31,6 @@ def copy_header_dict_items(source_header_dict, target_header_dict, keys):
     Copy selected keys from source header to target. Replacing if they exist
     """
     for key in keys:
-        # Change to lower case
-        key = key.lower()
         try:
             target_header_dict[key] = source_header_dict[key]
             print("Copied {}".format(key))
@@ -46,8 +44,10 @@ def run_copy_header(sourceheader, targetheader, keys):
 
     """
     # Read header info to dictionaries
-    source_header_dict = envi_header.read_hdr_file(args.sourceheader[0])
-    target_header_dict = envi_header.read_hdr_file(args.targetheader[0])
+    source_header_dict = envi_header.read_hdr_file(args.sourceheader[0],
+                                                   keep_case=True)
+    target_header_dict = envi_header.read_hdr_file(args.targetheader[0],
+                                                   keep_case=True)
 
     copy_header_dict_items(source_header_dict, target_header_dict, args.keys)
 
