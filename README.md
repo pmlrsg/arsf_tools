@@ -106,6 +106,26 @@ Copy selected keys from one header to another.
 
 A script to batch map level 1b files to level 3b using APL.
 
+**apply_elc_to_bil**
+
+A script to apply an empirical line correction to a BIL file. Takes field and image spectra from white, grey and black target in a CSV file
+with the following headings:
+
+```
+wavelength,white,grey,black
+```
+
+From these performs a linar fit for each wavelength in the image (interpolating
+field spectra to match). Coefficients from linear fit are then applied to the image.
+
+Usage:
+```
+apply_elc_to_bil.py --image_spectra spectra/f168051b_target_spectra.csv \
+                    --field_spectra spectra/20170617-field_spec_targets.csv \
+                    flightlines/level1b/f168051b.bil \
+                    outputs/f168051b_elc.bil
+```
+
 **Airborne Processing Library (APL)**
 
 Library for processing hyperspectral data. Available from https://github.com/arsf/apl
