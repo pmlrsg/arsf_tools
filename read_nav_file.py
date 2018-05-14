@@ -251,6 +251,8 @@ if __name__=='__main__':
                          help="Only output records whose time value falls within the given limits.",metavar="time")
     parser.add_argument('--closest','-c',type=float,default=None,nargs='+',\
                          help="Print out the full records that have closest time value to the given time(s).",metavar="time")
+    parser.add_argument('--degrees', action='store_true', default=False,
+                         help="Convert values from radians to degrees")
     commandline=parser.parse_args()
 
     if 'list' in commandline.parse:
@@ -295,6 +297,21 @@ if __name__=='__main__':
     #Now trim the data down depending on the given time limits
     trimmed_data=navdata[numpy.where(navdata['time'] > commandline.limits[0])]
     trimmed_data=trimmed_data[numpy.where(trimmed_data['time'] < commandline.limits[1])]
+
+    if commandline.degrees:
+        trimmed_data['lat'] = numpy.rad2deg(trimmed_data['lat'])
+        trimmed_data['lon'] = numpy.rad2deg(trimmed_data['lon'])
+        trimmed_data['standard_deviation_latitude'] = numpy.rad2deg(trimmed_data['standard_deviation_latitude'])
+        trimmed_data['standard_deviation_longitude'] = numpy.rad2deg(trimmed_data['standard_deviation_longitude'])
+        trimmed_data['roll'] = numpy.rad2deg(trimmed_data['roll'])
+        trimmed_data['pitch'] = numpy.rad2deg(trimmed_data['pitch'])
+        trimmed_data['heading'] = numpy.rad2deg(trimmed_data['heading'])
+        trimmed_data['standard_deviation_roll'] = numpy.rad2deg(trimmed_data['standard_deviation_roll'])
+        trimmed_data['standard_deviation_pitch'] = numpy.rad2deg(trimmed_data['standard_deviation_pitch'])
+        trimmed_data['standard_deviation_true_heading'] = numpy.rad2deg(trimmed_data['standard_deviation_true_heading'])
+        trimmed_data['roll_rate'] = numpy.rad2deg(trimmed_data['roll_rate'])
+        trimmed_data['pitch_rate'] = numpy.rad2deg(trimmed_data['pitch_rate'])
+        trimmed_data['heading_rate'] = numpy.rad2deg(trimmed_data['heading_rate'])
 
     #Get the parse strings from the command line
     ziplist=[]
