@@ -163,7 +163,7 @@ def readSol(filename):
     #Calculate checksum for first record. This is done again later on the whole
     #data set. This is just here so if it is clearly rubbish I don't read the
     #whole file into memory
-    fd=open(filename, 'r')
+    fd=open(filename, 'rb')
     header_size=numpy.empty(0, dtype=numpy.dtype(sol_header_types())).itemsize
     header=fd.read(header_size)
     fd.close()
@@ -174,7 +174,17 @@ def readSol(filename):
         # ^ means xor
         checksum ^= byte
     #end for
-    if checksum != ord(header[header_size-1]):
+
+    if isinstance(header[-1],str):
+        #python2 compatible - need to convert from the string to int
+        headerchecksum=ord(header[-1])
+    elif isinstance(header[-1],int):
+        #python3 compatible - already in ints
+        headerchecksum=header[-1]
+    else:
+        raise TypeError("Header checksum not correct type - could be Python2/Python3 compatibility issue.")
+
+    if checksum != headerchecksum:
         raise IOError("Header checksum does not match")
     #end if
 
