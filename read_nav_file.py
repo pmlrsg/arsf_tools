@@ -182,7 +182,7 @@ def readSol(filename):
         #python3 compatible - already in ints
         headerchecksum=header[-1]
     else:
-        raise IOError("Header checksum not correct type - could be Python2/Python3 compatibility issue.")
+        raise TypeError("Header checksum not correct type - could be Python2/Python3 compatibility issue.")
 
     if checksum != headerchecksum:
         raise IOError("Header checksum does not match")
