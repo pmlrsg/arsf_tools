@@ -160,24 +160,35 @@ def readSol(filename):
     record_length=numpy.empty(0, dtype=data_type).itemsize
     header_length_noCheck=numpy.empty(0,
                              dtype=numpy.dtype(sol_header_types()[:-1])).itemsize
-    #Calculate checksum for first record. This is done again later on the whole
-    #data set. This is just here so if it is clearly rubbish I don't read the
-    #whole file into memory
-    fd=open(filename, 'r')
-    header_size=numpy.empty(0, dtype=numpy.dtype(sol_header_types())).itemsize
-    header=fd.read(header_size)
-    fd.close()
-    #Calculate the checksum
-    checksum = 0
-    #Do a cumulative bitwise xor on all elements of the header bytearray
-    for byte in bytearray(header[:-1]):
-        # ^ means xor
-        checksum ^= byte
-    #end for
-    if checksum != ord(header[header_size-1]):
-        raise IOError("Header checksum does not match")
-    #end if
-
+    try:
+        #Calculate checksum for first record. This is done again later on the whole
+        #data set. This is just here so if it is clearly rubbish I don't read the
+        #whole file into memory
+        fd=open(filename, 'r')
+        header_size=numpy.empty(0, dtype=numpy.dtype(sol_header_types())).itemsize
+        header=fd.read(header_size)
+        fd.close()
+        #Calculate the checksum
+        checksum = 0
+        #Do a cumulative bitwise xor on all elements of the header bytearray
+        for byte in bytearray(header[:-1]):
+            # ^ means xor
+            checksum ^= byte
+        #end for
+        if checksum != ord(header[header_size-1]):
+            raise IOError("Header checksum does not match")
+        #end if
+    except UnicodeDecodeError:
+        #FIXME: Currently this doesn't work on Python3.
+        # If UnicodeDecodeError is thrown (Python3) then pass for now, a full
+        # check will be performed later.
+        # Any other exceptions will be  thrown
+        pass
+    except (TypeError, IndexError):
+        # For text rather than binary Python3 will throw a TypeError, Python2
+        # an IndexError.
+        raise IOError("Could not read header to perform checksum. "
+                      "Is '{}' a sol file?".format(filename))
     #Read file into memory, is a numpy array of tuples (not really tuples, these
     #are mutable, it looks like a tuple though)
     sol_data=numpy.fromfile(filename, dtype=data_type)
