@@ -160,6 +160,26 @@ Other
 
 A script / library to read SOL/SBET format navigation files.
 
+**python convert_wgs84_to_geoid.py**
+
+Converts from heights relative to the WGS-84 ellipsoid to relative to EGM96 Geoid.
+
+Conversion is based on 15 minute gridded conversion file available from: https://earth-info.nga.mil/GandG/wgs84/gravitymod/egm96/binary/binarygeoid.html
+
+The tool can be used from the command line:
+```
+python convert_wgs84_to_geoid.py --lat 54 --lon -4 --height 0
+```
+Or imported and used as a Python function
+
+```python
+import convert_wgs84_to_geoid
+
+convert_wgs84_to_geoid.convert_wgs_84_to_geoid(in_lat=54, in_lon=-4, in_elevation=0,
+                                               wgs84_to_geoid=True)
+```
+Setting `wgs84_to_geoid` to `False` will do the conversion the other way (EGM96 to WGS84).
+
 **ARSF on JASMIN**
 
 Scripts for running ARSF on the [JASMIN](http://jasmin.ac.uk/) system are available from https://github.com/arsf/arsf_on_jasmin
