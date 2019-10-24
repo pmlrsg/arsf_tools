@@ -46,9 +46,8 @@ def get_pixel_value(in_lat, in_lon, raster_file):
 
 def convert_wgs_84_to_geoid(in_lat, in_lon, in_elevation, wgs84_to_geoid=True):
     """
-    Converts elevation relative to WGS84 elepsioud to relative to EGM96
+    Converts elevation relative to WGS84 ellipsoid to relative to EGM96 geoid
     Geoid
-
     """
 
     ellipsoid_diff = get_pixel_value(in_lat, in_lon, WWGSG_FILE)
@@ -61,17 +60,18 @@ def convert_wgs_84_to_geoid(in_lat, in_lon, in_elevation, wgs84_to_geoid=True):
     return new_elevation
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Convert heights between ellipsoid and geoid (AMSL)") 
+    parser = argparse.ArgumentParser(description="Convert heights between ellipsoid and geoid (approximation of AMSL)") 
     parser.add_argument("--lat",type=float, required=True,
                         help="Latitude")
     parser.add_argument("--lon",type=float, required=True,
                         help="Longitude")
     parser.add_argument("--height",type=float, required=True,
                         help="Height to convert")
-    parser.add_argument("--wgs84_to_egm96", action="store_true", default=True, 
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("--wgs84_to_egm96", action="store_true", default=True, 
                         help="Input Height is relative to WGS84 Ellipsoid and should be"
                              " converted to relative to EGM96 Geoid")
-    parser.add_argument("--egm96_to_wgs84", action="store_true", default=False, 
+    group.add_argument("--egm96_to_wgs84", action="store_true", default=False, 
                         help="Input Height is relative to EGM96 Geoid and should be"
                               " converted to relative to WGS84 Ellipsoid")
     args=parser.parse_args()
