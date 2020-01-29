@@ -271,7 +271,7 @@ if __name__ == "__main__":
     # Set output values
     output_file.set_x(input_file.get_x())
     output_file.set_y(input_file.get_y())
-    output_file.set_y(input_file.get_z())
+    output_file.set_z(input_file.get_z())
     output_file.set_intensity(input_file.get_intensity())
     output_file.set_return_num(input_file.get_return_num())
     output_file.set_num_returns(input_file.get_num_returns())
