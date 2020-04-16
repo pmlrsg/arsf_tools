@@ -218,19 +218,17 @@ if __name__ == "__main__":
     new_header = copy.copy(input_file.header)
     new_header.data_format_id = 2
 
+    # Open output file
     output_file = laspy.file.File(args.outputlas[0], mode = "w",
                                   header=new_header,
                                   vlrs = input_file.header.vlrs)
 
-    # Copy across points
-    output_file.points = input_file.points
-
     # Get scaled x and y values
     point_x = input_file.get_x_scaled()
     point_y = input_file.get_y_scaled()
-    out_red = output_file.get_red()
-    out_green = output_file.get_green()
-    out_blue = output_file.get_blue()
+    out_red = numpy.zeros_like(point_x, dtype=numpy.uint8)
+    out_green = numpy.zeros_like(point_x, dtype=numpy.uint8)
+    out_blue = numpy.zeros_like(point_x, dtype=numpy.uint8)
     # Set up pixel extraction class
 
     pixelval = ExtractPixels(args.image,
@@ -269,6 +267,15 @@ if __name__ == "__main__":
     print("Set colour for {}/{} points".format(colour_pixels, point_x.shape[0]))
 
     pixelval = None
+
+    # Set output values
+    output_file.set_x(input_file.get_x())
+    output_file.set_y(input_file.get_y())
+    output_file.set_z(input_file.get_z())
+    output_file.set_intensity(input_file.get_intensity())
+    output_file.set_return_num(input_file.get_return_num())
+    output_file.set_num_returns(input_file.get_num_returns())
+    output_file.set_classification(input_file.get_classification())
 
     output_file.set_red(out_red)
     output_file.set_green(out_green)
