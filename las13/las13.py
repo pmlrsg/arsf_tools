@@ -103,7 +103,7 @@ class las13():
            The waveform as a dictionary with keys 'x','y','z', and 'intensity'.
         """
         if not isinstance(pulse,las13reader.Pulse):
-            print "las13.waveform expects a Pulse object to be passed, not: %s"%type(pulse)
+            print("las13.waveform expects a Pulse object to be passed, not: %s"%type(pulse))
             return None
         #number of samples
         nsamples=pulse.nsamples()
@@ -163,7 +163,7 @@ class las13():
         elif keyword == 'disint':
             return list(pulse.discreteintensities())
         else:
-            print "Keyword should be one of: ",keywords
+            print("Keyword should be one of: ",keywords)
             raise Exception("Unrecognised keyword in get_pulse_info: %s."%(keyword))
 
     #Function to plot the pulse
