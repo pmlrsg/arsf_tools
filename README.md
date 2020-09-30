@@ -1,5 +1,5 @@
-NERC-ARF Tools
-================
+NEODAAS Airborne Tools
+=======================
 
 Various tools for using, processing or handling airborne remote sensing data acquired
 by the National Environment Research Council ([NERC](http://www.nerc.ac.uk/))
