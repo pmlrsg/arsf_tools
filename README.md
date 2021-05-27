@@ -5,7 +5,7 @@ Various tools for using, processing or handling airborne remote sensing data acq
 by the National Environment Research Council ([NERC](http://www.nerc.ac.uk/))
 Airborne Research Facility ([NERC-ARF](https://bas.ac.uk/nerc-arf ); formerly ARSF).
 
-Developed by the NERC-ARF Data Analysis Node ([NERC-ARF-DAN](http://nerc-arf-dan.pml.ac.uk/)) based at Plymouth Marine Laboratory.
+Developed by the NERC-ARF Data Analysis Node ([NERC-ARF-DAN](http://nerc-arf-dan.pml.ac.uk/)) based at Plymouth Marine Laboratory and maintained by the NERC Earth Observation Data Aqusition and Analysis Service ([NEODAAS](https://www.neodaas.ac.uk/Home)).
 
 Most tools are written in Python and depend on other libraries such as NumPy, see
 individual scripts for more details on required libraries.
