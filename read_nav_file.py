@@ -263,6 +263,8 @@ if __name__=='__main__':
                          help="Print out the full records that have closest time value to the given time(s).",metavar="time")
     parser.add_argument('--degrees', action='store_true', default=False,
                          help="Convert values from radians to degrees")
+    parser.add_argument('--sec_offset', type=float, default=0.0,
+                         help="Convert values from radians to degrees")
     commandline=parser.parse_args()
 
     if 'list' in commandline.parse:
@@ -331,6 +333,9 @@ if __name__=='__main__':
         trimmed_data['roll'] = numpy.rad2deg(trimmed_data['roll'])
         trimmed_data['pitch'] = numpy.rad2deg(trimmed_data['pitch'])
         trimmed_data['heading'] = numpy.rad2deg(trimmed_data['heading'])
+
+    # Apply second offset (default is 0.0)
+    trimmed_data['time'] = trimmed_data['time'] + commandline.sec_offset
 
     #Get the parse strings from the command line
     ziplist=[]
