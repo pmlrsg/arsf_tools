@@ -264,7 +264,7 @@ if __name__=='__main__':
     parser.add_argument('--degrees', action='store_true', default=False,
                          help="Convert values from radians to degrees")
     parser.add_argument('--sec_offset', type=float, default=0.0,
-                         help="Convert values from radians to degrees")
+                         help="Add an offset to all times in nav file (in seconds)")
     commandline=parser.parse_args()
 
     if 'list' in commandline.parse:
