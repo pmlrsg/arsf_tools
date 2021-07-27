@@ -291,10 +291,12 @@ if __name__=='__main__':
     try:
         print("Trying to read as SOL file ...")
         navdata=readSol(commandline.input)
+        in_format = "sol"
     except:
         try:
             print("Failed.\nTrying to read as SBET file ...")
             navdata=readSbet(commandline.input)
+            in_format = "sbet"
         except Exception as e:
             raise(e)
 
@@ -308,7 +310,7 @@ if __name__=='__main__':
     trimmed_data=navdata[numpy.where(navdata['time'] > commandline.limits[0])]
     trimmed_data=trimmed_data[numpy.where(trimmed_data['time'] < commandline.limits[1])]
 
-    if commandline.degrees:
+    if commandline.degrees and in_format == "sol":
         trimmed_data['lat'] = numpy.rad2deg(trimmed_data['lat'])
         trimmed_data['lon'] = numpy.rad2deg(trimmed_data['lon'])
         trimmed_data['standard_deviation_latitude'] = numpy.rad2deg(trimmed_data['standard_deviation_latitude'])
@@ -322,6 +324,13 @@ if __name__=='__main__':
         trimmed_data['roll_rate'] = numpy.rad2deg(trimmed_data['roll_rate'])
         trimmed_data['pitch_rate'] = numpy.rad2deg(trimmed_data['pitch_rate'])
         trimmed_data['heading_rate'] = numpy.rad2deg(trimmed_data['heading_rate'])
+
+    elif commandline.degrees and in_format == "sbet":
+        trimmed_data['lat'] = numpy.rad2deg(trimmed_data['lat'])
+        trimmed_data['lon'] = numpy.rad2deg(trimmed_data['lon'])
+        trimmed_data['roll'] = numpy.rad2deg(trimmed_data['roll'])
+        trimmed_data['pitch'] = numpy.rad2deg(trimmed_data['pitch'])
+        trimmed_data['heading'] = numpy.rad2deg(trimmed_data['heading'])
 
     #Get the parse strings from the command line
     ziplist=[]
