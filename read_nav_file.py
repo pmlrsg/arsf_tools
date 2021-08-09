@@ -263,6 +263,8 @@ if __name__=='__main__':
                          help="Print out the full records that have closest time value to the given time(s).",metavar="time")
     parser.add_argument('--degrees', action='store_true', default=False,
                          help="Convert values from radians to degrees")
+    parser.add_argument('--sec_offset', type=float, default=0.0,
+                         help="Add an offset to all times in nav file (in seconds)")
     commandline=parser.parse_args()
 
     if 'list' in commandline.parse:
@@ -291,10 +293,12 @@ if __name__=='__main__':
     try:
         print("Trying to read as SOL file ...")
         navdata=readSol(commandline.input)
+        in_format = "sol"
     except:
         try:
             print("Failed.\nTrying to read as SBET file ...")
             navdata=readSbet(commandline.input)
+            in_format = "sbet"
         except Exception as e:
             raise(e)
 
@@ -308,7 +312,7 @@ if __name__=='__main__':
     trimmed_data=navdata[numpy.where(navdata['time'] > commandline.limits[0])]
     trimmed_data=trimmed_data[numpy.where(trimmed_data['time'] < commandline.limits[1])]
 
-    if commandline.degrees:
+    if commandline.degrees and in_format == "sol":
         trimmed_data['lat'] = numpy.rad2deg(trimmed_data['lat'])
         trimmed_data['lon'] = numpy.rad2deg(trimmed_data['lon'])
         trimmed_data['standard_deviation_latitude'] = numpy.rad2deg(trimmed_data['standard_deviation_latitude'])
@@ -322,6 +326,16 @@ if __name__=='__main__':
         trimmed_data['roll_rate'] = numpy.rad2deg(trimmed_data['roll_rate'])
         trimmed_data['pitch_rate'] = numpy.rad2deg(trimmed_data['pitch_rate'])
         trimmed_data['heading_rate'] = numpy.rad2deg(trimmed_data['heading_rate'])
+
+    elif commandline.degrees and in_format == "sbet":
+        trimmed_data['lat'] = numpy.rad2deg(trimmed_data['lat'])
+        trimmed_data['lon'] = numpy.rad2deg(trimmed_data['lon'])
+        trimmed_data['roll'] = numpy.rad2deg(trimmed_data['roll'])
+        trimmed_data['pitch'] = numpy.rad2deg(trimmed_data['pitch'])
+        trimmed_data['heading'] = numpy.rad2deg(trimmed_data['heading'])
+
+    # Apply second offset (default is 0.0)
+    trimmed_data['time'] = trimmed_data['time'] + commandline.sec_offset
 
     #Get the parse strings from the command line
     ziplist=[]
