@@ -168,10 +168,10 @@ if __name__ == "__main__":
                         default=DEFAULT_SCALE_FACTOR,
                         help="Scale factor to apply to reflectance values. "
                              "Used so image can be saved as uint16. "
-                             "(Default {}".format(DEFAULT_SCALE_FACTOR))
+                             "(Default {})".format(DEFAULT_SCALE_FACTOR))
 
     args = parser.parse_args()
 
     apply_elc(args.inputimage[0], args.outputimage[0],
-              args.image_spectra, args.field_spectra)
+              args.image_spectra, args.field_spectra, args.scale)
     print("Saved to {}".format(args.outputimage[0]))
